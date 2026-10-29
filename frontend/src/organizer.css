@@ -1,0 +1,156 @@
+/* Ұйымдастырушы кабинеті + қосымша компоненттер (минималистік, ақ фон) */
+
+.page--narrow { max-width: 420px; }
+
+.toprow { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+.toprow__link, .back {
+  color: var(--muted);
+  font-size: 14px;
+  text-decoration: none;
+}
+.toprow__link:hover, .back:hover { color: var(--text); }
+.back { display: inline-block; margin-bottom: 16px; }
+
+.link--danger { color: var(--danger); margin-top: 32px; font-size: 14px; }
+
+/* Topbar */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 16px;
+  margin-bottom: 28px;
+  border-bottom: 1px solid var(--line);
+}
+.topbar__brand { color: var(--text); font-weight: 650; text-decoration: none; }
+.topbar__right { display: flex; align-items: center; gap: 16px; color: var(--muted); font-size: 14px; }
+
+/* Page heads */
+.head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 20px; }
+.head--top { align-items: flex-start; }
+.head h1 { margin: 0; font-size: 28px; font-weight: 650; letter-spacing: -0.02em; }
+.head__sub { margin: 4px 0 0; color: var(--muted); text-transform: capitalize; }
+
+.block { margin-top: 28px; }
+.block__title { margin: 0 0 10px; font-size: 13px; font-weight: 550; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* Buttons that are links */
+.btn--link { display: inline-block; text-decoration: none; text-align: center; }
+.btn--ghost { background: transparent; color: var(--text); border: 1px solid var(--line); }
+.btn--ghost:hover:not(:disabled) { border-color: var(--text); opacity: 1; }
+
+/* Dashboard rows */
+.rows { display: grid; gap: 8px; }
+.rows--past { opacity: 0.6; }
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.15s;
+}
+.row:hover { border-color: var(--text); }
+.row__time { display: flex; align-items: baseline; gap: 10px; }
+.row__time strong { font-size: 20px; font-weight: 650; letter-spacing: -0.01em; }
+.row__time span { color: var(--muted); font-size: 14px; text-transform: capitalize; }
+.row__meta { color: var(--muted); font-size: 14px; margin-top: 2px; }
+.row__side { display: grid; text-align: right; }
+.row__side b { font-size: 18px; }
+.row__side span { color: var(--muted); font-size: 13px; }
+
+/* Game detail */
+.info { display: flex; align-items: center; gap: 14px; padding: 16px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.info__line { display: block; color: var(--muted); font-size: 14px; }
+
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 16px; }
+.stat { padding: 14px; background: var(--soft); border-radius: 12px; display: grid; gap: 2px; }
+.stat b { font-size: 20px; letter-spacing: -0.01em; }
+.stat span { color: var(--muted); font-size: 12px; }
+
+.people { list-style: none; margin: 0; padding: 0; }
+.person {
+  display: grid;
+  grid-template-columns: 24px 1fr auto auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.person__n { color: var(--muted); font-size: 13px; }
+.person__info { display: grid; min-width: 0; }
+.person__info strong { font-weight: 550; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.person__info a { color: var(--muted); font-size: 13px; text-decoration: none; }
+.person__gender { color: var(--muted); font-size: 13px; }
+
+.paid {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  min-width: 92px;
+}
+.paid:hover { border-color: var(--text); color: var(--text); }
+.paid--yes { background: var(--text); border-color: var(--text); color: #fff; }
+.paid--yes:hover { color: #fff; opacity: 0.85; }
+
+.icon-btn { background: none; border: 0; color: var(--muted); font-size: 22px; line-height: 1; cursor: pointer; padding: 0 4px; }
+.icon-btn:hover { color: var(--danger); }
+
+.state--tight { padding: 16px 0; text-align: left; }
+
+/* Add participant */
+.add { display: grid; grid-template-columns: 1fr 1fr 110px auto; gap: 8px; }
+.add input, .add select, .form select, .form input, .auth input, .field select {
+  padding: 11px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--text);
+  min-width: 0;
+}
+.add input:focus, .add select:focus, .form input:focus, .form select:focus, .auth input:focus, .field select:focus {
+  outline: none;
+  border-color: var(--text);
+}
+.add__error { grid-column: 1 / -1; margin: 0; }
+@media (max-width: 560px) {
+  .add { grid-template-columns: 1fr 1fr; }
+  .person { grid-template-columns: 20px 1fr auto auto; }
+  .person__gender { display: none; }
+  .stats { grid-template-columns: 1fr; }
+}
+
+/* Forms */
+.form, .auth { display: block; }
+.form__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form__actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+.hint { color: var(--muted); font-size: 13px; }
+.field small.form-error { margin: 0; }
+.field input.input--error { border-color: var(--danger); }
+
+/* Override: all field inputs (date, time, number, email, password…) */
+.field input:not([type='radio']) {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--text);
+  min-width: 0;
+}
+.field input:not([type='radio']):focus { outline: none; border-color: var(--text); }
+
+.auth h1 { margin: 12px 0 4px; font-size: 26px; font-weight: 650; letter-spacing: -0.02em; }
+.auth__sub { margin: 0 0 24px; color: var(--muted); }
+.auth__switch { display: block; margin: 16px auto 0; font-size: 14px; color: var(--muted); }
+
+/* Өріс қатесі */
+.field--error input:not([type='radio']) { border-color: var(--danger); }
+.field__error { color: var(--danger); font-size: 13px; }
