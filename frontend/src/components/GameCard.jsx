@@ -1,3 +1,5 @@
+import ShareButton from './ShareButton.jsx';
+
 export function formatDuration(minutes) {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
@@ -10,12 +12,14 @@ export function formatPrice(price) {
   return `${price.toLocaleString('ru-RU')} ₸`;
 }
 
-export default function GameCard({ game, onRegister }) {
+/** closedLabel: ойын тіркеуге жабық болса (мысалы өтіп кетсе), батырмадағы жазу */
+export default function GameCard({ game, onRegister, closedLabel }) {
   const percent = Math.min(100, Math.round((game.registered_count / game.capacity) * 100));
   const left = game.capacity - game.registered_count;
+  const closed = game.is_full || Boolean(closedLabel);
 
   return (
-    <article className={`card ${game.is_full ? 'card--full' : ''}`}>
+    <article className={`card ${closed ? 'card--full' : ''}`}>
       <div className="card__top">
         <span className={`badge badge--${game.format}`}>{game.format_label}</span>
         <span className="card__price">
@@ -54,9 +58,12 @@ export default function GameCard({ game, onRegister }) {
         <span className="organizer">
           Ұйымдастырушы: <b>{game.organizer_name}</b>
         </span>
-        <button className="btn" disabled={game.is_full} onClick={onRegister}>
-          {game.is_full ? 'Толды' : 'Тіркелу'}
-        </button>
+        <div className="card__actions">
+          <ShareButton game={game} />
+          <button className="btn" disabled={closed} onClick={onRegister}>
+            {closedLabel ?? (game.is_full ? 'Толды' : 'Тіркелу')}
+          </button>
+        </div>
       </div>
     </article>
   );

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { addParticipant, deleteGame, orgGame, removeParticipant, setPaid } from '../../api';
 import { formatDuration, formatPrice } from '../../components/GameCard.jsx';
+import SharePanel from '../../components/SharePanel.jsx';
 import { normalizePhone } from '../../phone';
 import {
   PHONE_PREFIX,
@@ -176,6 +177,11 @@ export default function GameDetail() {
       </div>
 
       {error && <p className="form-error">{error}</p>}
+
+      <section className="block">
+        <h2 className="block__title">Ойынға сілтеме</h2>
+        <SharePanel game={game} />
+      </section>
 
       <section className="block">
         <h2 className="block__title">Қатысушылар</h2>
