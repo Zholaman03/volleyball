@@ -138,9 +138,14 @@ export default function GameDetail() {
             {formatDate(game.play_date)} · {formatDuration(game.duration_minutes)}
           </p>
         </div>
-        <Link to={`/organizer/games/${game.id}/edit`} className="btn btn--ghost btn--link">
-          Өзгерту
-        </Link>
+        <div className="head__actions">
+          <Link to={`/organizer/games/new?from=${game.id}`} className="btn btn--ghost btn--link">
+            Көшіру
+          </Link>
+          <Link to={`/organizer/games/${game.id}/edit`} className="btn btn--ghost btn--link">
+            Өзгерту
+          </Link>
+        </div>
       </div>
 
       <div className="info">

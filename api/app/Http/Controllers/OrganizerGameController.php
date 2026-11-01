@@ -10,6 +10,8 @@ use App\Rules\WhatsAppNumber;
 use App\Services\RegistrationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class OrganizerGameController extends Controller
@@ -37,17 +39,39 @@ class OrganizerGameController extends Controller
         return new OrganizerGameResource($game);
     }
 
-    /** POST /api/organizer/games */
+    /**
+     * POST /api/organizer/games
+     *
+     * `repeat_weeks` (0–12, міндетті емес): сол ойынды қосымша қанша апта қайталап қосу.
+     * Мысалы 3 болса, күні + 7, +14, +21 күнге де ойын жасалады (барлығы 4).
+     * Бәрі бір транзакцияда: не бәрі қосылады, не ешқайсысы.
+     * Жауап: бірінші ойын (`data`) және `meta.created` — қосылған ойын саны.
+     */
     public function store(Request $request): JsonResponse
     {
         $data = $this->validated($request);
+        $repeat = (int) $request->input('repeat_weeks', 0); // validated() тексерген
 
-        $game = $request->user()->games()->create(
-            $data + ['organizer_name' => $request->user()->name]
-        );
-        $game->loadCount($this->counts());
+        $games = DB::transaction(function () use ($request, $data, $repeat) {
+            $created = [];
 
-        return (new OrganizerGameResource($game))->response()->setStatusCode(201);
+            for ($week = 0; $week <= $repeat; $week++) {
+                $created[] = $request->user()->games()->create([
+                    ...$data,
+                    'play_date'      => Carbon::parse($data['play_date'])->addWeeks($week)->toDateString(),
+                    'organizer_name' => $request->user()->name,
+                ]);
+            }
+
+            return $created;
+        });
+
+        $first = $games[0]->loadCount($this->counts());
+
+        return (new OrganizerGameResource($first))
+            ->additional(['meta' => ['created' => count($games)]])
+            ->response()
+            ->setStatusCode(201);
     }
 
     /** PUT /api/organizer/games/{game} */
@@ -181,13 +205,17 @@ class OrganizerGameController extends Controller
             'venue_address'    => ['required', 'string', 'max:255'],
             'price'            => ['required', 'integer', 'min:0', 'max:1000000'],
             'teams_count'      => ['required', 'integer', 'min:1', 'max:6'],
+            'repeat_weeks'     => ['nullable', 'integer', 'min:0', 'max:12'], // тек жаңа ойын қосқанда қолданылады
         ], [
             'required'                 => 'Барлық өрісті толтырыңыз.',
             'play_date.after_or_equal' => 'Өткен күнді таңдауға болмайды.',
             'integer'                  => 'Сан енгізіңіз.',
             'in'                       => 'Формат дұрыс емес.',
+            'repeat_weeks.max'         => 'Ең көбі 12 апта қайталауға болады.',
+            'repeat_weeks.min'         => 'Қайталау саны теріс болмауы керек.',
         ]);
 
+        unset($data['repeat_weeks']); // ойынның өрісі емес
         $data['start_time'] .= ':00';
         $data['capacity'] = $data['teams_count'] * Game::TEAM_SIZE;
 
