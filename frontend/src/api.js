@@ -70,8 +70,8 @@ export const logoutRequest = () => request('/auth/logout', { method: 'POST' });
 /* ---- Ұйымдастырушы ---- */
 export const orgGames = async () => (await request('/organizer/games')).data;
 export const orgGame = async (id) => (await request(`/organizer/games/${id}`)).data;
-export const createGame = async (payload) =>
-  (await request('/organizer/games', { method: 'POST', body: payload })).data;
+// Жауап: { data: бірінші ойын, meta: { created: қосылған ойын саны } }
+export const createGame = (payload) => request('/organizer/games', { method: 'POST', body: payload });
 export const updateGame = async (id, payload) =>
   (await request(`/organizer/games/${id}`, { method: 'PUT', body: payload })).data;
 export const deleteGame = (id) => request(`/organizer/games/${id}`, { method: 'DELETE' });

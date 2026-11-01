@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { createGame, orgGame, updateGame } from '../../api';
 import { formatDuration } from '../../components/GameCard.jsx';
-import { DURATIONS, FORMAT_OPTIONS, TEAM_SIZE, todayStr } from '../../utils';
+import { DURATIONS, FORMAT_OPTIONS, TEAM_SIZE, formatDate, todayStr } from '../../utils';
 
 const EMPTY = {
   format: 'mixed',
@@ -15,34 +15,59 @@ const EMPTY = {
   teams_count: 3,
 };
 
+// Ойынды қанша апта қайталау (backend-те ең көбі 12)
+const REPEAT_OPTIONS = [0, 1, 2, 3, 4, 7, 11];
+
+function addDays(iso, n) {
+  const d = new Date(`${iso}T00:00:00`);
+  d.setDate(d.getDate() + n);
+  return d.toLocaleDateString('sv-SE'); // YYYY-MM-DD
+}
+
+/** Көшірілген ойынның жаңа күні: сол апта күні, бірақ бұрынғы күннен кейін және бүгіннен бұрын емес */
+function nextWeekly(iso) {
+  const today = todayStr();
+  let next = addDays(iso, 7);
+  while (next < today) next = addDays(next, 7);
+  return next;
+}
+
+function toForm(g, playDate) {
+  return {
+    format: g.format,
+    play_date: playDate,
+    start_time: g.start_time,
+    duration_minutes: g.duration_minutes,
+    venue_name: g.venue_name,
+    venue_address: g.venue_address,
+    price: g.price,
+    teams_count: g.teams_count,
+  };
+}
+
 export default function GameForm() {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const copyFrom = searchParams.get('from');
+
   const isEdit = Boolean(id);
+  const isCopy = !isEdit && Boolean(copyFrom);
+  const sourceId = isEdit ? id : copyFrom;
   const navigate = useNavigate();
 
   const [form, setForm] = useState(EMPTY);
-  const [loading, setLoading] = useState(isEdit);
+  const [repeat, setRepeat] = useState(0);
+  const [loading, setLoading] = useState(Boolean(sourceId));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!isEdit) return;
-    orgGame(id)
-      .then((g) =>
-        setForm({
-          format: g.format,
-          play_date: g.play_date,
-          start_time: g.start_time,
-          duration_minutes: g.duration_minutes,
-          venue_name: g.venue_name,
-          venue_address: g.venue_address,
-          price: g.price,
-          teams_count: g.teams_count,
-        })
-      )
+    if (!sourceId) return;
+    orgGame(sourceId)
+      .then((g) => setForm(toForm(g, isEdit ? g.play_date : nextWeekly(g.play_date))))
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
-  }, [id, isEdit]);
+  }, [sourceId, isEdit]);
 
   const set = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
 
@@ -57,8 +82,15 @@ export default function GameForm() {
       teams_count: Number(form.teams_count),
     };
     try {
-      const saved = isEdit ? await updateGame(id, payload) : await createGame(payload);
-      navigate(`/organizer/games/${saved.id}`);
+      if (isEdit) {
+        const saved = await updateGame(id, payload);
+        navigate(`/organizer/games/${saved.id}`);
+      } else {
+        const res = await createGame({ ...payload, repeat_weeks: repeat });
+        const created = res.meta?.created ?? 1;
+        // Бірнеше ойын қосылса — тізімге, біреу болса — сол ойынның бетіне
+        navigate(created > 1 ? '/organizer' : `/organizer/games/${res.data.id}`);
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -69,12 +101,20 @@ export default function GameForm() {
   if (loading) return <p className="state">Жүктелуде…</p>;
 
   const teams = Number(form.teams_count);
+  const total = repeat + 1;
+  const lastDate = form.play_date ? addDays(form.play_date, 7 * repeat) : '';
 
   return (
     <>
       <div className="head">
-        <h1>{isEdit ? 'Ойынды өзгерту' : 'Жаңа ойын'}</h1>
+        <h1>{isEdit ? 'Ойынды өзгерту' : isCopy ? 'Ойынды көшіру' : 'Жаңа ойын'}</h1>
       </div>
+
+      {isCopy && !error && (
+        <p className="hint hint--block">
+          Бұрынғы ойынның мәліметтері көшірілді, күні келесі аптаға ауыстырылды. Қажет болса өзгертіңіз.
+        </p>
+      )}
 
       <form className="form" onSubmit={submit}>
         <label className="field">
@@ -140,14 +180,36 @@ export default function GameForm() {
           </small>
         </label>
 
+        {!isEdit && (
+          <label className="field">
+            <span>Апта сайын қайталау</span>
+            <select value={repeat} onChange={(e) => setRepeat(Number(e.target.value))}>
+              {REPEAT_OPTIONS.map((n) => (
+                <option key={n} value={n}>
+                  {n === 0 ? 'Қайталамау' : `Тағы ${n} апта`}
+                </option>
+              ))}
+            </select>
+            {repeat > 0 && form.play_date && (
+              <small className="hint">
+                Барлығы {total} ойын қосылады: {formatDate(form.play_date)} → {formatDate(lastDate)}. Әрқайсысына
+                тіркелу бөлек жүреді.
+              </small>
+            )}
+          </label>
+        )}
+
         {error && <p className="form-error">{error}</p>}
 
         <div className="form__actions">
-          <Link to={isEdit ? `/organizer/games/${id}` : '/organizer'} className="btn btn--ghost btn--link">
+          <Link
+            to={isEdit ? `/organizer/games/${id}` : isCopy ? `/organizer/games/${copyFrom}` : '/organizer'}
+            className="btn btn--ghost btn--link"
+          >
             Бас тарту
           </Link>
           <button className="btn" disabled={busy}>
-            {busy ? 'Сақталуда…' : isEdit ? 'Сақтау' : 'Ойын қосу'}
+            {busy ? 'Сақталуда…' : isEdit ? 'Сақтау' : total > 1 ? `${total} ойын қосу` : 'Ойын қосу'}
           </button>
         </div>
       </form>
