@@ -6,6 +6,7 @@ use App\Http\Resources\OrganizerGameResource;
 use App\Http\Resources\RegistrationResource;
 use App\Models\Game;
 use App\Models\Registration;
+use App\Rules\WhatsAppNumber;
 use App\Services\RegistrationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -98,13 +99,12 @@ class OrganizerGameController extends Controller
 
         $data = $request->validate([
             'name'   => ['required', 'string', 'max:100'],
-            'phone'  => ['required', 'string', 'regex:/^\+?[0-9\s\-()]{10,18}$/'],
+            'phone'  => ['required', 'string', new WhatsAppNumber],
             'gender' => ['required', 'in:male,female'],
             'paid'   => ['sometimes', 'boolean'],
         ], [
             'name.required'   => 'Атын жазыңыз.',
-            'phone.required'  => 'Телефон нөмірін жазыңыз.',
-            'phone.regex'     => 'Телефон нөмірі дұрыс емес.',
+            'phone.required'  => 'WhatsApp нөмірін жазыңыз.',
             'gender.required' => 'Жынысын таңдаңыз.',
         ]);
 
