@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Game;
+use App\Support\PhoneNumber;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -11,9 +12,10 @@ use Illuminate\Support\Facades\DB;
  */
 class RegistrationService
 {
+    /** WhatsApp (E.164) пішімі: +77011234567. Бір нөмір әр түрлі жазылса да бірдей болады. */
     public static function normalizePhone(string $phone): string
     {
-        return preg_replace('/[^\d+]/', '', $phone);
+        return PhoneNumber::normalize($phone) ?? $phone;
     }
 
     /**

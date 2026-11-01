@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\GameResource;
 use App\Models\Game;
+use App\Rules\WhatsAppNumber;
 use App\Services\RegistrationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -47,12 +48,11 @@ class GameController extends Controller
     {
         $data = $request->validate([
             'name'   => ['required', 'string', 'max:100'],
-            'phone'  => ['required', 'string', 'regex:/^\+?[0-9\s\-()]{10,18}$/'],
+            'phone'  => ['required', 'string', new WhatsAppNumber],
             'gender' => ['required', 'in:male,female'],
         ], [
             'name.required'   => 'Атыңызды жазыңыз.',
-            'phone.required'  => 'Телефон нөмірін жазыңыз.',
-            'phone.regex'     => 'Телефон нөмірі дұрыс емес.',
+            'phone.required'  => 'WhatsApp нөміріңізді жазыңыз.',
             'gender.required' => 'Жынысыңызды таңдаңыз.',
         ]);
 
