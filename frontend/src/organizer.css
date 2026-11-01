@@ -135,6 +135,25 @@
 .form__actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
 .hint { color: var(--muted); font-size: 13px; }
 .hint--block { margin: 0 0 16px; }
+
+/* Бөлісу */
+.toprow--left { justify-content: flex-start; }
+.card__bottom { flex-wrap: wrap; }
+.card__actions { display: flex; gap: 8px; margin-left: auto; }
+.share { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; }
+.share input {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--soft);
+  color: var(--muted);
+  min-width: 0;
+}
+.share input:focus { outline: none; border-color: var(--text); color: var(--text); }
+@media (max-width: 560px) {
+  .share { grid-template-columns: 1fr 1fr; }
+  .share input { grid-column: 1 / -1; }
+}
 .field small.form-error { margin: 0; }
 .field input.input--error { border-color: var(--danger); }
 

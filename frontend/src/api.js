@@ -58,6 +58,8 @@ async function request(path, { method = 'GET', body } = {}) {
 export const fetchGames = async (date) =>
   (await request(`/games${date ? `?date=${date}` : ''}`)).data;
 
+export const fetchGame = async (id) => (await request(`/games/${id}`)).data;
+
 export const registerToGame = (gameId, payload) =>
   request(`/games/${gameId}/register`, { method: 'POST', body: payload });
 
