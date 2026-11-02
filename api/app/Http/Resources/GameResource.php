@@ -33,6 +33,7 @@ class GameResource extends JsonResource
             'capacity'         => $this->capacity,
             'registered_count' => $registered,
             'is_full'          => $registered >= $this->capacity,
+            'waitlist_count'   => $this->waitlist_count ?? $this->waitlist()->count(),
             'male'             => ['registered' => $male, 'limit' => $limits['male']],
             'female'           => ['registered' => $female, 'limit' => $limits['female']],
             'organizer_name'   => $this->organizer_name,

@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import Home from './pages/Home.jsx';
 import GamePage from './pages/GamePage.jsx';
+import CancelPage from './pages/CancelPage.jsx';
 import Login from './pages/organizer/Login.jsx';
 import OrganizerLayout from './pages/organizer/OrganizerLayout.jsx';
 import Dashboard from './pages/organizer/Dashboard.jsx';
@@ -12,6 +13,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/games/:id" element={<GamePage />} />
+      <Route path="/cancel/:token" element={<CancelPage />} />
 
       <Route path="/organizer/login" element={<Login />} />
       <Route path="/organizer" element={<OrganizerLayout />}>

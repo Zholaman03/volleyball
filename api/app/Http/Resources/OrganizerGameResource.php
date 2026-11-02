@@ -18,6 +18,8 @@ class OrganizerGameResource extends GameResource
             'payment_overdue'        => $this->paymentDeadline()?->isPast() ?? false, // мерзім өтті ме (сервер уақытымен)
             'paid_count'    => $paid,
             'registrations' => RegistrationResource::collection($this->whenLoaded('registrations')),
+            'waitlist'      => RegistrationResource::collection($this->whenLoaded('waitlist')),
+            'cancelled'     => RegistrationResource::collection($this->whenLoaded('cancelledRegistrations')),
         ];
     }
 }

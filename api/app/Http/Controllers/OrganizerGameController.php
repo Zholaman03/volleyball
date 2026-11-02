@@ -33,8 +33,11 @@ class OrganizerGameController extends Controller
     {
         $this->authorizeOwner($request, $game);
 
-        $game->load(['registrations' => fn ($q) => $q->orderBy('created_at')->orderBy('id')])
-            ->loadCount($this->counts());
+        $game->load([
+            'registrations' => fn ($q) => $q->orderBy('created_at')->orderBy('id'),
+            'waitlist',
+            'cancelledRegistrations',
+        ])->loadCount($this->counts());
 
         return new OrganizerGameResource($game);
     }
@@ -158,6 +161,25 @@ class OrganizerGameController extends Controller
         return new RegistrationResource($registration);
     }
 
+    /** POST /api/organizer/games/{game}/registrations/{registration}/promote — күту тізімінен ойынға қосу */
+    public function promoteRegistration(
+        Request $request,
+        Game $game,
+        Registration $registration,
+        RegistrationService $registrations
+    ): JsonResponse {
+        $this->authorizeOwner($request, $game);
+        $this->ensureBelongs($game, $registration);
+
+        $result = $registrations->promote($registration);
+
+        if (! $result['ok']) {
+            return response()->json(['message' => $result['message']], $result['status']);
+        }
+
+        return (new RegistrationResource($result['registration']))->response();
+    }
+
     /** DELETE /api/organizer/games/{game}/registrations/{registration} */
     public function removeRegistration(Request $request, Game $game, Registration $registration)
     {
@@ -183,6 +205,7 @@ class OrganizerGameController extends Controller
     {
         return [
             'registrations',
+            'waitlist',
             'registrations as male_count'   => fn ($q) => $q->where('gender', 'male'),
             'registrations as female_count' => fn ($q) => $q->where('gender', 'female'),
             'registrations as paid_count'   => fn ($q) => $q->where('paid', true),

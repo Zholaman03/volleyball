@@ -63,6 +63,10 @@ export const fetchGame = async (id) => (await request(`/games/${id}`)).data;
 export const registerToGame = (gameId, payload) =>
   request(`/games/${gameId}/register`, { method: 'POST', body: payload });
 
+/* ---- Ойыншының өз тіркеуі (құпия сілтеме бойынша) ---- */
+export const fetchMyRegistration = async (token) => (await request(`/registrations/${token}`)).data;
+export const cancelMyRegistration = (token) => request(`/registrations/${token}/cancel`, { method: 'POST' });
+
 /* ---- Аккаунт ---- */
 export const loginRequest = (payload) => request('/auth/login', { method: 'POST', body: payload });
 export const registerOrganizer = (payload) => request('/auth/register', { method: 'POST', body: payload });
@@ -85,5 +89,7 @@ export const setPaid = (gameId, registrationId, paid) =>
     method: 'PATCH',
     body: { paid },
   });
+export const promoteParticipant = (gameId, registrationId) =>
+  request(`/organizer/games/${gameId}/registrations/${registrationId}/promote`, { method: 'POST' });
 export const removeParticipant = (gameId, registrationId) =>
   request(`/organizer/games/${gameId}/registrations/${registrationId}`, { method: 'DELETE' });

@@ -166,6 +166,10 @@
 .pay span { color: var(--muted); font-size: 12px; }
 .pay strong { font-weight: 600; word-break: break-word; }
 .pay .btn { justify-self: start; margin-top: 6px; }
+.people--muted { opacity: 0.75; }
+.people--muted .person { grid-template-columns: 1fr auto auto; }
+.refund { color: var(--danger); font-size: 13px; }
+.paid:disabled { opacity: 0.4; cursor: not-allowed; }
 .paid--late { border-color: var(--danger); color: var(--danger); }
 .stats--one { grid-template-columns: 1fr; }
 .check { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; cursor: pointer; font-size: 15px; }

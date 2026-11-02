@@ -51,9 +51,47 @@ class Game extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    /** Ойынға қатысатындар (status = active). Орын санының барлық есебі осыны қолданады */
     public function registrations(): HasMany
     {
+        return $this->hasMany(Registration::class)->where('status', Registration::ACTIVE);
+    }
+
+    /** Күту тізімі: жазылу тәртібімен */
+    public function waitlist(): HasMany
+    {
+        return $this->hasMany(Registration::class)->where('status', Registration::WAITLIST)->orderBy('id');
+    }
+
+    /** Бас тартқандар (төлемі бар болса, ақша қайтару үшін сақталған) */
+    public function cancelledRegistrations(): HasMany
+    {
+        return $this->hasMany(Registration::class)->where('status', Registration::CANCELLED)->orderByDesc('cancelled_at');
+    }
+
+    /** Кез келген статустағы жазбалар (бір нөмір бір ойында бір ғана жол — unique) */
+    public function allRegistrations(): HasMany
+    {
         return $this->hasMany(Registration::class);
+    }
+
+    /** Ойыншы бас тарта алатын соңғы уақыт: ойын басталуына осынша сағат қалғанға дейін */
+    public const CANCEL_HOURS_BEFORE = 3;
+
+    public function cancelDeadline(): Carbon
+    {
+        return $this->startsAt()->subHours(self::CANCEL_HOURS_BEFORE);
+    }
+
+    public function canCancel(): bool
+    {
+        return now()->lt($this->cancelDeadline());
+    }
+
+    /** "2026-11-05 19:00" (қолданбаның уақыт белдеуінде) */
+    public function cancelDeadlineString(): string
+    {
+        return $this->cancelDeadline()->format('Y-m-d H:i');
     }
 
     /** Тегін ойын: баға 0. Төлем мәліметі мен төлем мерзімі қолданылмайды */

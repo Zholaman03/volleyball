@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\GameResource;
 use App\Models\Game;
+use App\Models\Registration;
 use App\Rules\WhatsAppNumber;
 use App\Services\RegistrationService;
 use Illuminate\Http\JsonResponse;
@@ -22,6 +23,7 @@ class GameController extends Controller
             ->whereDate('play_date', $date)
             ->withCount([
                 'registrations',
+                'waitlist',
                 'registrations as male_count'   => fn ($q) => $q->where('gender', 'male'),
                 'registrations as female_count' => fn ($q) => $q->where('gender', 'female'),
             ])
@@ -36,6 +38,7 @@ class GameController extends Controller
     {
         $game->loadCount([
             'registrations',
+            'waitlist',
             'registrations as male_count'   => fn ($q) => $q->where('gender', 'male'),
             'registrations as female_count' => fn ($q) => $q->where('gender', 'female'),
         ]);
@@ -50,27 +53,41 @@ class GameController extends Controller
             'name'   => ['required', 'string', 'max:100'],
             'phone'  => ['required', 'string', new WhatsAppNumber],
             'gender' => ['required', 'in:male,female'],
+            'waitlist' => ['sometimes', 'boolean'], // орын жоқ болса, күту тізіміне жазылу
         ], [
             'name.required'   => 'Атыңызды жазыңыз.',
             'phone.required'  => 'WhatsApp нөміріңізді жазыңыз.',
             'gender.required' => 'Жынысыңызды таңдаңыз.',
         ]);
 
+        $waitlist = (bool) ($data['waitlist'] ?? false);
+        unset($data['waitlist']);
         $data['phone'] = RegistrationService::normalizePhone($data['phone']);
 
-        $result = $registrations->register($game, $data);
+        $result = $registrations->register($game, $data, false, $waitlist);
 
         if (! $result['ok']) {
-            return response()->json(['message' => $result['message']], $result['status']);
+            return response()->json(
+                ['message' => $result['message'], 'full' => $result['full'] ?? false],
+                $result['status']
+            );
         }
+
+        $registration = $result['registration'];
+        $onWaitlist = $registration->status === Registration::WAITLIST;
 
         return response()->json([
             'message'          => $result['message'],
+            'status'           => $registration->status, // active | waitlist
+            'waitlist_position' => $registrations->waitlistPosition($registration),
+            'cancel_token'     => $registration->cancel_token, // жеке бас тарту сілтемесі: /cancel/<token>
+            'cancel_deadline'  => $game->cancelDeadlineString(),
             'registered_count' => $result['registered_count'],
             'capacity'         => $result['capacity'],
             'is_free'          => $game->isFree(),
-            'payment_info'     => $game->isFree() ? null : $game->payment_info, // төлем мәліметі тек тіркелгеннен кейін беріледі
-            'payment_deadline' => $game->paymentDeadlineString(), // "2026-11-05 20:00" немесе null
+            // Төлем мәліметі тек ойынға тіркелгенде беріледі (күту тізімінде — орын босағанша емес)
+            'payment_info'     => ($game->isFree() || $onWaitlist) ? null : $game->payment_info,
+            'payment_deadline' => $onWaitlist ? null : $game->paymentDeadlineString(), // "2026-11-05 20:00" немесе null
         ], 201);
     }
 }
