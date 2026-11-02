@@ -16,10 +16,10 @@ export function formatPrice(price) {
 export default function GameCard({ game, onRegister, closedLabel }) {
   const percent = Math.min(100, Math.round((game.registered_count / game.capacity) * 100));
   const left = game.capacity - game.registered_count;
-  const closed = game.is_full || Boolean(closedLabel);
+  const closed = Boolean(closedLabel); // тек өтіп кеткен ойын жабық; толған ойынға күту тізіміне жазылуға болады
 
   return (
-    <article className={`card ${closed ? 'card--full' : ''}`}>
+    <article className={`card ${closed || game.is_full ? 'card--full' : ''}`}>
       <div className="card__top">
         <span className={`badge badge--${game.format}`}>{game.format_label}</span>
         <span className="card__price">
@@ -53,7 +53,13 @@ export default function GameCard({ game, onRegister, closedLabel }) {
             </b>{' '}
             · {game.teams_count} команда
           </span>
-          <span className="spots__left">{game.is_full ? 'Орын жоқ' : `${left} орын қалды`}</span>
+          <span className="spots__left">
+            {game.is_full
+              ? game.waitlist_count > 0
+                ? `Орын жоқ · күтуде: ${game.waitlist_count}`
+                : 'Орын жоқ'
+              : `${left} орын қалды`}
+          </span>
         </div>
         <div className="bar" role="progressbar" aria-valuenow={percent} aria-valuemin="0" aria-valuemax="100">
           <div className="bar__fill" style={{ width: `${percent}%` }} />
@@ -67,7 +73,7 @@ export default function GameCard({ game, onRegister, closedLabel }) {
         <div className="card__actions">
           <ShareButton game={game} />
           <button className="btn" disabled={closed} onClick={onRegister}>
-            {closedLabel ?? (game.is_full ? 'Толды' : 'Тіркелу')}
+            {closedLabel ?? (game.is_full ? 'Күту тізімі' : 'Тіркелу')}
           </button>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { registerToGame } from '../api';
 import { normalizePhone } from '../phone';
 import { copyText } from '../share';
@@ -7,27 +8,44 @@ import { formatPrice } from './GameCard.jsx';
 
 const PHONE_ERROR = 'WhatsApp нөмірін дұрыс енгізіңіз, мысалы: +7 701 123 45 67.';
 
-function isGenderFull(game, gender) {
+// Бұл жыныс форматқа мүлде кірмейді (мысалы, қыздар форматында ұлдар): таңдауға болмайды
+export function isGenderBlocked(game, gender) {
+  return game[gender].limit === 0;
+}
+
+// Орын жоқ: жалпы толған немесе осы жыныс лимиті бітті. Мұндайда күту тізіміне жазылуға болады
+export function isGenderFull(game, gender) {
   const slot = game[gender];
-  return slot.limit !== null && slot.registered >= slot.limit;
+  return game.is_full || (slot.limit !== null && slot.registered >= slot.limit);
 }
 
 export default function RegisterModal({ game, onClose, onDone }) {
-  const defaultGender = ['male', 'female'].find((g) => !isGenderFull(game, g)) ?? '';
+  const genders = ['male', 'female'];
+  const defaultGender =
+    genders.find((g) => !isGenderBlocked(game, g) && !isGenderFull(game, g)) ??
+    genders.find((g) => !isGenderBlocked(game, g)) ??
+    '';
 
   const [form, setForm] = useState({ name: '', phone: PHONE_PREFIX, gender: defaultGender });
   const [phoneError, setPhoneError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  const [payment, setPayment] = useState(''); // ұйымдастырушының төлем мәліметі (тіркелгеннен кейін келеді)
-  const [deadline, setDeadline] = useState(''); // "2026-11-05 20:00": төлем мерзімі (мерзімсіз/тегін болса бос)
-  const [copied, setCopied] = useState(false);
+  const [result, setResult] = useState(null); // сервердің жауабы: status, cancel_token, төлем мәліметі…
+  const [copied, setCopied] = useState(''); // 'pay' | 'link' | ''
 
-  async function copyPayment() {
-    if (await copyText(payment)) {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+  const onWaitlist = result?.status === 'waitlist';
+  const payment = result?.payment_info ?? ''; // ұйымдастырушының төлем мәліметі (тіркелгеннен кейін келеді)
+  const deadline = result?.payment_deadline ?? ''; // "2026-11-05 20:00": төлем мерзімі (мерзімсіз/тегін болса бос)
+  const cancelPath = result ? `/cancel/${result.cancel_token}` : '';
+
+  // Таңдалған жынысқа орын жоқ болса, форма күту тізіміне жазуға ауысады
+  const waitlistMode = form.gender !== '' && isGenderFull(game, form.gender);
+
+  async function copy(kind, text) {
+    if (await copyText(text)) {
+      setCopied(kind);
+      setTimeout(() => setCopied(''), 2000);
     }
   }
 
@@ -56,14 +74,13 @@ export default function RegisterModal({ game, onClose, onDone }) {
     setSubmitting(true);
     setError('');
     try {
-      const res = await registerToGame(game.id, { ...form, phone });
-      setPayment(res.payment_info ?? '');
-      setDeadline(res.payment_deadline ?? '');
+      const res = await registerToGame(game.id, { ...form, phone, waitlist: waitlistMode });
+      setResult(res);
       setSuccess(true);
       onDone();
     } catch (err) {
       setError(err.message);
-      if (err.status === 409) onDone(); // орын санын жаңарту
+      if (err.status === 409) onDone(); // орын санын жаңарту (толып қалса, батырма күту тізіміне ауысады)
     } finally {
       setSubmitting(false);
     }
@@ -79,12 +96,18 @@ export default function RegisterModal({ game, onClose, onDone }) {
         {success ? (
           <div className="success">
             <div className="success__icon">✓</div>
-            <h2>Тіркелдіңіз!</h2>
+            <h2>{onWaitlist ? 'Күту тізіміндесіз' : 'Тіркелдіңіз!'}</h2>
             <p>
-              {game.start_time}–{game.end_time}, {game.venue_name}.{' '}
-              {game.is_free ? 'Ойын тегін.' : `Төлем: ${formatPrice(game.price)}.`}
+              {game.start_time}–{game.end_time}, {game.venue_name}.
+              {!onWaitlist && ` ${game.is_free ? 'Ойын тегін.' : `Төлем: ${formatPrice(game.price)}.`}`}
             </p>
-            {game.is_free ? (
+
+            {onWaitlist ? (
+              <p>
+                Сіздің орныңыз: <b>№{result.waitlist_position}</b>. Орын босаса, ұйымдастырушы{' '}
+                <b>{game.organizer_name}</b> сізбен WhatsApp арқылы байланысады.
+              </p>
+            ) : game.is_free ? (
               <p>
                 Ұйымдастырушы <b>{game.organizer_name}</b> қажет болса сізбен WhatsApp арқылы байланысады.
               </p>
@@ -94,8 +117,8 @@ export default function RegisterModal({ game, onClose, onDone }) {
                   <div className="pay">
                     <span>Төлем мәліметі</span>
                     <strong>{payment}</strong>
-                    <button type="button" className="btn btn--ghost" onClick={copyPayment}>
-                      {copied ? 'Көшірілді ✓' : 'Көшіру'}
+                    <button type="button" className="btn btn--ghost" onClick={() => copy('pay', payment)}>
+                      {copied === 'pay' ? 'Көшірілді ✓' : 'Көшіру'}
                     </button>
                   </div>
                 )}
@@ -115,16 +138,43 @@ export default function RegisterModal({ game, onClose, onDone }) {
                 )}
               </>
             )}
+
+            <div className="pay">
+              <span>Бас тарту сілтемесі</span>
+              <Link to={cancelPath} className="link" onClick={onClose}>
+                {window.location.origin}
+                {cancelPath}
+              </Link>
+              <button
+                type="button"
+                className="btn btn--ghost"
+                onClick={() => copy('link', `${window.location.origin}${cancelPath}`)}
+              >
+                {copied === 'link' ? 'Көшірілді ✓' : 'Сілтемені көшіру'}
+              </button>
+            </div>
+            <p className="hint">
+              Келе алмасаңыз, осы сілтеме арқылы бас тартыңыз. Сақтап қойыңыз, қайта көрсетілмейді.
+              {!onWaitlist &&
+                ` Бас тартуға болады: ${deadlineText(game.play_date, result.cancel_deadline)}-ге дейін.`}
+            </p>
+
             <button className="btn" onClick={onClose}>
               Жақсы
             </button>
           </div>
         ) : (
           <form onSubmit={submit}>
-            <h2>Ойынға тіркелу</h2>
+            <h2>{waitlistMode ? 'Күту тізіміне жазылу' : 'Ойынға тіркелу'}</h2>
             <p className="modal__sub">
               {game.format_label} · {game.start_time}–{game.end_time} · {game.venue_name}
             </p>
+
+            {waitlistMode && (
+              <p className="hint hint--block">
+                Орын қалмады. Күту тізіміне жазылсаңыз, орын босағанда ұйымдастырушы сізбен WhatsApp-та байланысады.
+              </p>
+            )}
 
             <label className="field">
               <span>Аты-жөні</span>
@@ -158,18 +208,19 @@ export default function RegisterModal({ game, onClose, onDone }) {
                   ['male', 'Ұл'],
                   ['female', 'Қыз'],
                 ].map(([value, label]) => {
+                  const blocked = isGenderBlocked(game, value);
                   const full = isGenderFull(game, value);
                   return (
-                    <label key={value} className={`seg__item ${full ? 'seg__item--off' : ''}`}>
+                    <label key={value} className={`seg__item ${blocked ? 'seg__item--off' : ''}`}>
                       <input
                         type="radio"
                         name="gender"
                         value={value}
                         checked={form.gender === value}
-                        disabled={full}
+                        disabled={blocked}
                         onChange={set('gender')}
                       />
-                      <span>{full ? `${label} (толды)` : label}</span>
+                      <span>{blocked ? `${label} (толды)` : full ? `${label} (күту тізімі)` : label}</span>
                     </label>
                   );
                 })}
@@ -179,7 +230,13 @@ export default function RegisterModal({ game, onClose, onDone }) {
             {error && <p className="form-error">{error}</p>}
 
             <button className="btn btn--wide" disabled={submitting || !form.gender}>
-              {submitting ? 'Жіберілуде…' : game.is_free ? 'Тіркелу' : `Тіркелу · ${formatPrice(game.price)}`}
+              {submitting
+                ? 'Жіберілуде…'
+                : waitlistMode
+                  ? 'Күту тізіміне жазылу'
+                  : game.is_free
+                    ? 'Тіркелу'
+                    : `Тіркелу · ${formatPrice(game.price)}`}
             </button>
           </form>
         )}

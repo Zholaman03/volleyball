@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { addParticipant, deleteGame, orgGame, removeParticipant, setPaid } from '../../api';
+import {
+  addParticipant,
+  deleteGame,
+  orgGame,
+  promoteParticipant,
+  removeParticipant,
+  setPaid,
+} from '../../api';
 import { formatDuration, formatPrice } from '../../components/GameCard.jsx';
 import SharePanel from '../../components/SharePanel.jsx';
 import { paymentMessage } from '../../share';
@@ -249,6 +256,80 @@ export default function GameDetail() {
           </ul>
         )}
       </section>
+
+      {game.waitlist.length > 0 && (
+        <section className="block">
+          <h2 className="block__title">Күту тізімі</h2>
+          <ul className="people">
+            {game.waitlist.map((r, i) => {
+              const hasSpot = !game.is_full && !genderFull(game, r.gender);
+              const msg = `Сәлем, ${r.name}! ${formatDate(game.play_date)}, ${game.start_time} волейбол ойынында орын босады. Келесіз бе?`;
+              return (
+                <li key={r.id} className="person">
+                  <span className="person__n">{i + 1}</span>
+                  <div className="person__info">
+                    <strong>{r.name}</strong>
+                    <a href={whatsappLink(r.phone, msg)} target="_blank" rel="noreferrer">
+                      {formatPhoneInput(r.phone)} · орын босады деп жазу
+                    </a>
+                  </div>
+                  <span className="person__gender">{GENDER[r.gender]}</span>
+                  <button
+                    className="paid"
+                    disabled={!hasSpot}
+                    title={hasSpot ? '' : 'Бос орын жоқ'}
+                    onClick={() => run(() => promoteParticipant(game.id, r.id))}
+                  >
+                    Ойынға қосу
+                  </button>
+                  <button
+                    className="icon-btn"
+                    aria-label={`${r.name} өшіру`}
+                    onClick={() => {
+                      if (window.confirm(`${r.name} күту тізімінен шығарылсын ба?`)) {
+                        run(() => removeParticipant(game.id, r.id));
+                      }
+                    }}
+                  >
+                    ×
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
+
+      {game.cancelled.length > 0 && (
+        <section className="block">
+          <h2 className="block__title">Бас тартқандар</h2>
+          <ul className="people people--muted">
+            {game.cancelled.map((r) => (
+              <li key={r.id} className="person">
+                <div className="person__info">
+                  <strong>{r.name}</strong>
+                  <a href={whatsappLink(r.phone)} target="_blank" rel="noreferrer">
+                    {formatPhoneInput(r.phone)} · WhatsApp
+                  </a>
+                </div>
+                <span className={r.paid ? 'refund' : 'person__gender'}>{r.paid ? 'Төлемді қайтару керек' : GENDER[r.gender]}</span>
+                <button
+                  className="icon-btn"
+                  aria-label={`${r.name} жазбасын өшіру`}
+                  title={r.paid ? 'Ақша қайтарылған соң өшіріңіз' : 'Жазбаны өшіру'}
+                  onClick={() => {
+                    if (window.confirm(`${r.name} жазбасы өшірілсін бе?`)) {
+                      run(() => removeParticipant(game.id, r.id));
+                    }
+                  }}
+                >
+                  ×
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section className="block">
         <h2 className="block__title">Қолмен қосу</h2>

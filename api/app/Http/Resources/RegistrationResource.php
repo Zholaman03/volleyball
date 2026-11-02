@@ -16,6 +16,8 @@ class RegistrationResource extends JsonResource
             'phone'      => $this->phone,
             'gender'     => $this->gender,
             'paid'       => (bool) $this->paid,
+            'status'     => $this->status,
+            'cancelled_at' => $this->cancelled_at?->toIso8601String(),
             'created_at' => $this->created_at?->toIso8601String(),
         ];
     }

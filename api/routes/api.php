@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\OrganizerGameController;
+use App\Http\Controllers\RegistrationController;
 use Illuminate\Support\Facades\Route;
 
 // ---- Қонақтарға арналған (аккаунтсыз) ----
@@ -10,6 +11,10 @@ Route::get('/games', [GameController::class, 'index']);
 Route::get('/games/{game}', [GameController::class, 'show']);
 Route::post('/games/{game}/register', [GameController::class, 'register'])
     ->middleware('throttle:20,1');
+
+// Ойыншының өз тіркеуі: құпия сілтеме (token) арқылы көру және бас тарту
+Route::get('/registrations/{token}', [RegistrationController::class, 'show'])->middleware('throttle:60,1');
+Route::post('/registrations/{token}/cancel', [RegistrationController::class, 'cancel'])->middleware('throttle:20,1');
 
 // ---- Ұйымдастырушы аккаунты ----
 Route::post('/auth/register', [AuthController::class, 'register'])->middleware('throttle:10,1');
@@ -29,5 +34,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/games/{game}/registrations', [OrganizerGameController::class, 'addRegistration']);
         Route::patch('/games/{game}/registrations/{registration}', [OrganizerGameController::class, 'updateRegistration']);
         Route::delete('/games/{game}/registrations/{registration}', [OrganizerGameController::class, 'removeRegistration']);
+        Route::post('/games/{game}/registrations/{registration}/promote', [OrganizerGameController::class, 'promoteRegistration']);
     });
 });
