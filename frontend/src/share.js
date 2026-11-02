@@ -1,4 +1,4 @@
-import { formatDate } from './utils';
+import { deadlineText, formatDate } from './utils';
 
 const money = (price) => `${price.toLocaleString('ru-RU')} ₸`;
 
@@ -12,7 +12,7 @@ export function shareText(game) {
   return [
     `Волейбол · ${formatDate(game.play_date)}, ${game.start_time}–${game.end_time}`,
     `${game.venue_name}, ${game.venue_address}`,
-    `${game.format_label} · ${money(game.price)} адам басына`,
+    `${game.format_label} · ${game.is_free ? 'Тегін' : `${money(game.price)} адам басына`}`,
   ].join('\n');
 }
 
@@ -32,6 +32,9 @@ export function paymentMessage(game, registration) {
     `Төлем: ${money(game.price)}.`,
   ];
   if (game.payment_info) lines.push(game.payment_info);
+  if (game.payment_deadline) {
+    lines.push(`Төлемді ${deadlineText(game.play_date, game.payment_deadline)}-ге дейін жасаңыз.`);
+  }
   lines.push('Төлегеннен кейін чекті осы чатқа жіберіңіз. Рақмет!');
   return lines.join('\n');
 }

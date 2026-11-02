@@ -207,6 +207,7 @@ class OrganizerGameController extends Controller
             'teams_count'      => ['required', 'integer', 'min:1', 'max:6'],
             'repeat_weeks'     => ['nullable', 'integer', 'min:0', 'max:12'], // тек жаңа ойын қосқанда қолданылады
             'payment_info'     => ['nullable', 'string', 'max:255'],
+            'payment_deadline_hours' => ['nullable', 'integer', 'min:1', 'max:168'], // ойынға N сағат қалғанға дейін (≤ 7 күн)
         ], [
             'required'                 => 'Барлық өрісті толтырыңыз.',
             'play_date.after_or_equal' => 'Өткен күнді таңдауға болмайды.',
@@ -215,9 +216,18 @@ class OrganizerGameController extends Controller
             'repeat_weeks.max'         => 'Ең көбі 12 апта қайталауға болады.',
             'repeat_weeks.min'         => 'Қайталау саны теріс болмауы керек.',
             'payment_info.max'         => 'Төлем мәліметі 255 таңбадан аспауы керек.',
+            'payment_deadline_hours.min' => 'Төлем мерзімі кемінде 1 сағат болуы керек.',
+            'payment_deadline_hours.max' => 'Төлем мерзімі ең көбі 168 сағат (7 күн).',
         ]);
 
         unset($data['repeat_weeks']); // ойынның өрісі емес
+
+        // Тегін ойында (баға 0) төлем мәліметі мен мерзімі болмайды
+        if ((int) $data['price'] === 0) {
+            $data['payment_info'] = null;
+            $data['payment_deadline_hours'] = null;
+        }
+
         $data['start_time'] .= ':00';
         $data['capacity'] = $data['teams_count'] * Game::TEAM_SIZE;
 

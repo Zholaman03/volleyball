@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { registerToGame } from '../api';
 import { normalizePhone } from '../phone';
 import { copyText } from '../share';
-import { PHONE_PREFIX, formatPhoneInput } from '../utils';
+import { PHONE_PREFIX, deadlineText, formatPhoneInput } from '../utils';
 import { formatPrice } from './GameCard.jsx';
 
 const PHONE_ERROR = 'WhatsApp нөмірін дұрыс енгізіңіз, мысалы: +7 701 123 45 67.';
@@ -21,6 +21,7 @@ export default function RegisterModal({ game, onClose, onDone }) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [payment, setPayment] = useState(''); // ұйымдастырушының төлем мәліметі (тіркелгеннен кейін келеді)
+  const [deadline, setDeadline] = useState(''); // "2026-11-05 20:00": төлем мерзімі (мерзімсіз/тегін болса бос)
   const [copied, setCopied] = useState(false);
 
   async function copyPayment() {
@@ -57,6 +58,7 @@ export default function RegisterModal({ game, onClose, onDone }) {
     try {
       const res = await registerToGame(game.id, { ...form, phone });
       setPayment(res.payment_info ?? '');
+      setDeadline(res.payment_deadline ?? '');
       setSuccess(true);
       onDone();
     } catch (err) {
@@ -79,25 +81,39 @@ export default function RegisterModal({ game, onClose, onDone }) {
             <div className="success__icon">✓</div>
             <h2>Тіркелдіңіз!</h2>
             <p>
-              {game.start_time}–{game.end_time}, {game.venue_name}. Төлем: {formatPrice(game.price)}.
+              {game.start_time}–{game.end_time}, {game.venue_name}.{' '}
+              {game.is_free ? 'Ойын тегін.' : `Төлем: ${formatPrice(game.price)}.`}
             </p>
-            {payment ? (
-              <>
-                <div className="pay">
-                  <span>Төлем мәліметі</span>
-                  <strong>{payment}</strong>
-                  <button type="button" className="btn btn--ghost" onClick={copyPayment}>
-                    {copied ? 'Көшірілді ✓' : 'Көшіру'}
-                  </button>
-                </div>
-                <p>
-                  Төлегеннен кейін чекті ұйымдастырушыға (<b>{game.organizer_name}</b>) WhatsApp арқылы жіберіңіз.
-                </p>
-              </>
-            ) : (
+            {game.is_free ? (
               <p>
-                Ұйымдастырушы <b>{game.organizer_name}</b> төлем туралы сізбен WhatsApp арқылы байланысады.
+                Ұйымдастырушы <b>{game.organizer_name}</b> қажет болса сізбен WhatsApp арқылы байланысады.
               </p>
+            ) : (
+              <>
+                {payment && (
+                  <div className="pay">
+                    <span>Төлем мәліметі</span>
+                    <strong>{payment}</strong>
+                    <button type="button" className="btn btn--ghost" onClick={copyPayment}>
+                      {copied ? 'Көшірілді ✓' : 'Көшіру'}
+                    </button>
+                  </div>
+                )}
+                {deadline && (
+                  <p>
+                    Төлемді <b>{deadlineText(game.play_date, deadline)}</b>-ге дейін жасаңыз.
+                  </p>
+                )}
+                {payment ? (
+                  <p>
+                    Төлегеннен кейін чекті ұйымдастырушыға (<b>{game.organizer_name}</b>) WhatsApp арқылы жіберіңіз.
+                  </p>
+                ) : (
+                  <p>
+                    Ұйымдастырушы <b>{game.organizer_name}</b> төлем туралы сізбен WhatsApp арқылы байланысады.
+                  </p>
+                )}
+              </>
             )}
             <button className="btn" onClick={onClose}>
               Жақсы
@@ -163,7 +179,7 @@ export default function RegisterModal({ game, onClose, onDone }) {
             {error && <p className="form-error">{error}</p>}
 
             <button className="btn btn--wide" disabled={submitting || !form.gender}>
-              {submitting ? 'Жіберілуде…' : `Тіркелу · ${formatPrice(game.price)}`}
+              {submitting ? 'Жіберілуде…' : game.is_free ? 'Тіркелу' : `Тіркелу · ${formatPrice(game.price)}`}
             </button>
           </form>
         )}

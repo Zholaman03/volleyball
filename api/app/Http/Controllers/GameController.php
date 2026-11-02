@@ -68,7 +68,9 @@ class GameController extends Controller
             'message'          => $result['message'],
             'registered_count' => $result['registered_count'],
             'capacity'         => $result['capacity'],
-            'payment_info'     => $game->payment_info, // төлем мәліметі тек тіркелгеннен кейін беріледі
+            'is_free'          => $game->isFree(),
+            'payment_info'     => $game->isFree() ? null : $game->payment_info, // төлем мәліметі тек тіркелгеннен кейін беріледі
+            'payment_deadline' => $game->paymentDeadlineString(), // "2026-11-05 20:00" немесе null
         ], 201);
     }
 }

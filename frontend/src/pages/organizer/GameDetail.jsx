@@ -7,6 +7,7 @@ import { paymentMessage } from '../../share';
 import { normalizePhone } from '../../phone';
 import {
   PHONE_PREFIX,
+  deadlineText,
   formatDate,
   formatPhoneInput,
   isValidWhatsApp,
@@ -159,28 +160,40 @@ export default function GameDetail() {
       </div>
 
       <p className="pay-line">
-        {game.payment_info
-          ? `Төлем: ${game.payment_info}`
-          : 'Төлем мәліметі жоқ. «Өзгерту» арқылы Kaspi нөмірін қосыңыз.'}
+        {game.is_free
+          ? 'Тегін ойын: төлем қажет емес.'
+          : [
+              game.payment_info
+                ? `Төлем: ${game.payment_info}`
+                : 'Төлем мәліметі жоқ. «Өзгерту» арқылы Kaspi нөмірін қосыңыз.',
+              game.payment_deadline &&
+                `Мерзімі: ${deadlineText(game.play_date, game.payment_deadline)}${game.payment_overdue ? ' (өтті)' : ''}`,
+            ]
+              .filter(Boolean)
+              .join(' · ')}
       </p>
 
-      <div className="stats">
+      <div className={`stats ${game.is_free ? 'stats--one' : ''}`}>
         <div className="stat">
           <b>
             {game.registered_count}/{game.capacity}
           </b>
           <span>тіркелді</span>
         </div>
-        <div className="stat">
-          <b>
-            {game.paid_count}/{game.registered_count}
-          </b>
-          <span>төледі</span>
-        </div>
-        <div className="stat">
-          <b>{formatPrice(collected)}</b>
-          <span>жиналды · барлығы {formatPrice(expected)}</span>
-        </div>
+        {!game.is_free && (
+          <>
+            <div className="stat">
+              <b>
+                {game.paid_count}/{game.registered_count}
+              </b>
+              <span>төледі</span>
+            </div>
+            <div className="stat">
+              <b>{formatPrice(collected)}</b>
+              <span>жиналды · барлығы {formatPrice(expected)}</span>
+            </div>
+          </>
+        )}
       </div>
 
       {error && <p className="form-error">{error}</p>}
@@ -203,21 +216,23 @@ export default function GameDetail() {
                 <div className="person__info">
                   <strong>{r.name}</strong>
                   <a
-                    href={whatsappLink(r.phone, r.paid ? undefined : paymentMessage(game, r))}
+                    href={whatsappLink(r.phone, game.is_free || r.paid ? undefined : paymentMessage(game, r))}
                     target="_blank"
                     rel="noreferrer"
-                    title={r.paid ? 'WhatsApp-та жазу' : 'Төлем туралы WhatsApp-та жазу'}
+                    title={game.is_free || r.paid ? 'WhatsApp-та жазу' : 'Төлем туралы WhatsApp-та жазу'}
                   >
-                    {formatPhoneInput(r.phone)} · {r.paid ? 'WhatsApp' : 'төлемді еске салу'}
+                    {formatPhoneInput(r.phone)} · {game.is_free || r.paid ? 'WhatsApp' : 'төлемді еске салу'}
                   </a>
                 </div>
                 <span className="person__gender">{GENDER[r.gender]}</span>
-                <button
-                  className={`paid ${r.paid ? 'paid--yes' : ''}`}
-                  onClick={() => run(() => setPaid(game.id, r.id, !r.paid))}
-                >
-                  {r.paid ? 'Төленді' : 'Төленбеді'}
-                </button>
+                {!game.is_free && (
+                  <button
+                    className={`paid ${r.paid ? 'paid--yes' : game.payment_overdue ? 'paid--late' : ''}`}
+                    onClick={() => run(() => setPaid(game.id, r.id, !r.paid))}
+                  >
+                    {r.paid ? 'Төленді' : game.payment_overdue ? 'Мерзімі өтті' : 'Төленбеді'}
+                  </button>
+                )}
                 <button
                   className="icon-btn"
                   aria-label={`${r.name} өшіру`}

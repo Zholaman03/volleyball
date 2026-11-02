@@ -28,6 +28,7 @@ class GameResource extends JsonResource
             'venue_name'       => $this->venue_name,
             'venue_address'    => $this->venue_address,
             'price'            => $this->price,
+            'is_free'          => $this->isFree(),
             'teams_count'      => $this->teams_count,
             'capacity'         => $this->capacity,
             'registered_count' => $registered,

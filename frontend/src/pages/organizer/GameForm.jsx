@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { createGame, orgGame, updateGame } from '../../api';
 import { formatDuration } from '../../components/GameCard.jsx';
-import { DURATIONS, FORMAT_OPTIONS, TEAM_SIZE, formatDate, todayStr } from '../../utils';
+import { DURATIONS, FORMAT_OPTIONS, TEAM_SIZE, computeDeadline, deadlineText, formatDate, todayStr } from '../../utils';
+
+// Төлем мерзімі: ойынға неше сағат қалғанға дейін
+const DEADLINE_OPTIONS = [1, 2, 3, 6, 12, 24, 48];
 
 const EMPTY = {
   format: 'mixed',
@@ -13,6 +16,7 @@ const EMPTY = {
   venue_address: '',
   price: 1800,
   payment_info: '',
+  payment_deadline_hours: '',
   teams_count: 3,
 };
 
@@ -41,8 +45,9 @@ function toForm(g, playDate) {
     duration_minutes: g.duration_minutes,
     venue_name: g.venue_name,
     venue_address: g.venue_address,
-    price: g.price,
+    price: g.price === 0 ? 1800 : g.price,
     payment_info: g.payment_info ?? '',
+    payment_deadline_hours: g.payment_deadline_hours ?? '',
     teams_count: g.teams_count,
   };
 }
@@ -58,6 +63,7 @@ export default function GameForm() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState(EMPTY);
+  const [free, setFree] = useState(false);
   const [repeat, setRepeat] = useState(0);
   const [loading, setLoading] = useState(Boolean(sourceId));
   const [busy, setBusy] = useState(false);
@@ -66,7 +72,10 @@ export default function GameForm() {
   useEffect(() => {
     if (!sourceId) return;
     orgGame(sourceId)
-      .then((g) => setForm(toForm(g, isEdit ? g.play_date : nextWeekly(g.play_date))))
+      .then((g) => {
+        setForm(toForm(g, isEdit ? g.play_date : nextWeekly(g.play_date)));
+        setFree(g.price === 0);
+      })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, [sourceId, isEdit]);
@@ -80,7 +89,9 @@ export default function GameForm() {
     const payload = {
       ...form,
       duration_minutes: Number(form.duration_minutes),
-      price: Number(form.price),
+      price: free ? 0 : Number(form.price),
+      payment_info: free ? '' : form.payment_info,
+      payment_deadline_hours: free || form.payment_deadline_hours === '' ? null : Number(form.payment_deadline_hours),
       teams_count: Number(form.teams_count),
     };
     try {
@@ -105,6 +116,7 @@ export default function GameForm() {
   const teams = Number(form.teams_count);
   const total = repeat + 1;
   const lastDate = form.play_date ? addDays(form.play_date, 7 * repeat) : '';
+  const deadline = computeDeadline(form.play_date, form.start_time, Number(form.payment_deadline_hours));
 
   return (
     <>
@@ -141,6 +153,11 @@ export default function GameForm() {
           </label>
         </div>
 
+        <label className="check">
+          <input type="checkbox" checked={free} onChange={(e) => setFree(e.target.checked)} />
+          <span>Тегін ойын</span>
+        </label>
+
         <div className="form__grid">
           <label className="field">
             <span>Ұзақтығы</span>
@@ -152,10 +169,12 @@ export default function GameForm() {
               ))}
             </select>
           </label>
-          <label className="field">
-            <span>Құны, ₸ (адам басына)</span>
-            <input type="number" min="0" step="100" value={form.price} onChange={set('price')} required />
-          </label>
+          {!free && (
+            <label className="field">
+              <span>Құны, ₸ (адам басына)</span>
+              <input type="number" min="1" step="100" value={form.price} onChange={set('price')} required />
+            </label>
+          )}
         </div>
 
         <label className="field">
@@ -168,17 +187,38 @@ export default function GameForm() {
           <input type="text" value={form.venue_address} onChange={set('venue_address')} required maxLength={255} />
         </label>
 
-        <label className="field">
-          <span>Төлем мәліметі (міндетті емес)</span>
-          <input
-            type="text"
-            value={form.payment_info}
-            onChange={set('payment_info')}
-            placeholder="Kaspi: +7 701 123 45 67 (Ерлан А.)"
-            maxLength={255}
-          />
-          <small className="hint">Ойыншы тіркелгеннен кейін осыны көреді. Ашық тізімде көрсетілмейді.</small>
-        </label>
+        {!free && (
+          <>
+            <label className="field">
+              <span>Төлем мәліметі (міндетті емес)</span>
+              <input
+                type="text"
+                value={form.payment_info}
+                onChange={set('payment_info')}
+                placeholder="Kaspi: +7 701 123 45 67 (Ерлан А.)"
+                maxLength={255}
+              />
+              <small className="hint">Ойыншы тіркелгеннен кейін осыны көреді. Ашық тізімде көрсетілмейді.</small>
+            </label>
+
+            <label className="field">
+              <span>Төлем мерзімі (міндетті емес)</span>
+              <select value={form.payment_deadline_hours} onChange={set('payment_deadline_hours')}>
+                <option value="">Мерзімсіз</option>
+                {DEADLINE_OPTIONS.map((h) => (
+                  <option key={h} value={h}>
+                    Ойынға {h} сағат қалғанға дейін
+                  </option>
+                ))}
+              </select>
+              <small className="hint">
+                {deadline
+                  ? `Төлеу керек: ${deadlineText(form.play_date, deadline)}-ге дейін. Орын өздігінен босамайды, мерзімі өткен төлемсіздер тек белгіленеді.`
+                  : 'Ойыншыға тіркелгеннен кейін көрсетіледі.'}
+              </small>
+            </label>
+          </>
+        )}
 
         <label className="field">
           <span>Командалар саны</span>

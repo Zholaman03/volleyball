@@ -31,6 +31,7 @@ class Game extends Model
         'venue_address',
         'price',
         'payment_info',
+        'payment_deadline_hours',
         'teams_count',
         'capacity',
         'organizer_name',
@@ -40,6 +41,7 @@ class Game extends Model
         'play_date'        => 'date',
         'duration_minutes' => 'integer',
         'price'            => 'integer',
+        'payment_deadline_hours' => 'integer',
         'teams_count'      => 'integer',
         'capacity'         => 'integer',
     ];
@@ -52,6 +54,34 @@ class Game extends Model
     public function registrations(): HasMany
     {
         return $this->hasMany(Registration::class);
+    }
+
+    /** Тегін ойын: баға 0. Төлем мәліметі мен төлем мерзімі қолданылмайды */
+    public function isFree(): bool
+    {
+        return (int) $this->price === 0;
+    }
+
+    /** Ойынның басталу уақыты (қолданбаның уақыт белдеуінде) */
+    public function startsAt(): Carbon
+    {
+        return Carbon::parse($this->play_date->toDateString().' '.$this->start_time);
+    }
+
+    /** Төлем мерзімі: ойын басталуына payment_deadline_hours сағат қалғанда. Мерзімсіз не тегін ойында null */
+    public function paymentDeadline(): ?Carbon
+    {
+        if ($this->isFree() || $this->payment_deadline_hours === null) {
+            return null;
+        }
+
+        return $this->startsAt()->subHours((int) $this->payment_deadline_hours);
+    }
+
+    /** API үшін мерзім: "2026-11-05 20:00" (қолданбаның уақыт белдеуінде) */
+    public function paymentDeadlineString(): ?string
+    {
+        return $this->paymentDeadline()?->format('Y-m-d H:i');
     }
 
     /** Ойын аяқталатын уақыт, мысалы 22:00 + 120 минут = 00:00 */
