@@ -206,6 +206,7 @@ class OrganizerGameController extends Controller
             'price'            => ['required', 'integer', 'min:0', 'max:1000000'],
             'teams_count'      => ['required', 'integer', 'min:1', 'max:6'],
             'repeat_weeks'     => ['nullable', 'integer', 'min:0', 'max:12'], // тек жаңа ойын қосқанда қолданылады
+            'payment_info'     => ['nullable', 'string', 'max:255'],
         ], [
             'required'                 => 'Барлық өрісті толтырыңыз.',
             'play_date.after_or_equal' => 'Өткен күнді таңдауға болмайды.',
@@ -213,6 +214,7 @@ class OrganizerGameController extends Controller
             'in'                       => 'Формат дұрыс емес.',
             'repeat_weeks.max'         => 'Ең көбі 12 апта қайталауға болады.',
             'repeat_weeks.min'         => 'Қайталау саны теріс болмауы керек.',
+            'payment_info.max'         => 'Төлем мәліметі 255 таңбадан аспауы керек.',
         ]);
 
         unset($data['repeat_weeks']); // ойынның өрісі емес

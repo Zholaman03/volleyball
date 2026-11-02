@@ -22,6 +22,20 @@ export function whatsappShareUrl(game) {
   return `https://wa.me/?text=${encodeURIComponent(text)}`;
 }
 
+/**
+ * Ұйымдастырушыдан қатысушыға төлем туралы хабарлама (WhatsApp чатында дайын тұрады).
+ * game.payment_info бос болса, төлем жолы қосылмайды.
+ */
+export function paymentMessage(game, registration) {
+  const lines = [
+    `Сәлем, ${registration.name}! Сіз ${formatDate(game.play_date)}, ${game.start_time}–${game.end_time} (${game.venue_name}) волейбол ойынына тіркелдіңіз.`,
+    `Төлем: ${money(game.price)}.`,
+  ];
+  if (game.payment_info) lines.push(game.payment_info);
+  lines.push('Төлегеннен кейін чекті осы чатқа жіберіңіз. Рақмет!');
+  return lines.join('\n');
+}
+
 /** Мәтінді буферге көшіреді. Сәтсіз болса false қайтарады */
 export async function copyText(text) {
   try {

@@ -150,6 +150,22 @@
   min-width: 0;
 }
 .share input:focus { outline: none; border-color: var(--text); color: var(--text); }
+
+/* Төлем мәліметі */
+.pay-line { margin: 12px 0 0; color: var(--muted); font-size: 14px; }
+.pay {
+  width: 100%;
+  display: grid;
+  gap: 4px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--soft);
+  text-align: left;
+}
+.pay span { color: var(--muted); font-size: 12px; }
+.pay strong { font-weight: 600; word-break: break-word; }
+.pay .btn { justify-self: start; margin-top: 6px; }
 @media (max-width: 560px) {
   .share { grid-template-columns: 1fr 1fr; }
   .share input { grid-column: 1 / -1; }

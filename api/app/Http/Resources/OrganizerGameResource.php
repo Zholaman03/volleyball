@@ -12,6 +12,7 @@ class OrganizerGameResource extends GameResource
         $paid = $this->paid_count ?? $this->registrations()->where('paid', true)->count();
 
         return parent::toArray($request) + [
+            'payment_info'  => $this->payment_info, // ойыншыларға ашық тізімде көрсетілмейді
             'paid_count'    => $paid,
             'registrations' => RegistrationResource::collection($this->whenLoaded('registrations')),
         ];

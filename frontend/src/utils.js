@@ -52,7 +52,8 @@ export function isValidWhatsApp(value) {
   return normalizePhone(value) !== null;
 }
 
-/** wa.me сілтемесі (ұйымдастырушы жазу үшін) */
-export function whatsappLink(phone) {
-  return `https://wa.me/${phone.replace(/\D/g, '')}`;
+/** wa.me сілтемесі (ұйымдастырушы жазу үшін). text берілсе, чатта дайын хабарлама тұрады */
+export function whatsappLink(phone, text) {
+  const base = `https://wa.me/${phone.replace(/\D/g, '')}`;
+  return text ? `${base}?text=${encodeURIComponent(text)}` : base;
 }
