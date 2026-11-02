@@ -12,7 +12,10 @@ class OrganizerGameResource extends GameResource
         $paid = $this->paid_count ?? $this->registrations()->where('paid', true)->count();
 
         return parent::toArray($request) + [
-            'payment_info'  => $this->payment_info, // ойыншыларға ашық тізімде көрсетілмейді
+            'payment_info'  => $this->isFree() ? null : $this->payment_info, // ойыншыларға ашық тізімде көрсетілмейді
+            'payment_deadline_hours' => $this->isFree() ? null : $this->payment_deadline_hours,
+            'payment_deadline'       => $this->paymentDeadlineString(),
+            'payment_overdue'        => $this->paymentDeadline()?->isPast() ?? false, // мерзім өтті ме (сервер уақытымен)
             'paid_count'    => $paid,
             'registrations' => RegistrationResource::collection($this->whenLoaded('registrations')),
         ];

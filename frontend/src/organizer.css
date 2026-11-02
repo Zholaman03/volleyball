@@ -166,6 +166,9 @@
 .pay span { color: var(--muted); font-size: 12px; }
 .pay strong { font-weight: 600; word-break: break-word; }
 .pay .btn { justify-self: start; margin-top: 6px; }
+.paid--late { border-color: var(--danger); color: var(--danger); }
+.stats--one { grid-template-columns: 1fr; }
+.check { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; cursor: pointer; font-size: 15px; }
 @media (max-width: 560px) {
   .share { grid-template-columns: 1fr 1fr; }
   .share input { grid-column: 1 / -1; }

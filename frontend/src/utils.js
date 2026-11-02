@@ -57,3 +57,22 @@ export function whatsappLink(phone, text) {
   const base = `https://wa.me/${phone.replace(/\D/g, '')}`;
   return text ? `${base}?text=${encodeURIComponent(text)}` : base;
 }
+
+/**
+ * Төлем мерзімін есептейді: ойынның басталуына `hours` сағат қалғанда.
+ * Қайтарады "YYYY-MM-DD HH:MM" (серверден келетін пішіммен бірдей) немесе null.
+ */
+export function computeDeadline(playDate, startTime, hours) {
+  if (!playDate || !startTime || !hours) return null;
+  const start = new Date(`${playDate}T${startTime}:00`);
+  if (Number.isNaN(start.getTime())) return null;
+  const d = new Date(start.getTime() - hours * 3600 * 1000);
+  const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  return `${d.toLocaleDateString('sv-SE')} ${time}`;
+}
+
+/** "2026-11-05 20:00" → "20:00" (ойын күні сол болса) немесе "4 қараша, 20:00" */
+export function deadlineText(playDate, deadline) {
+  const [date, time] = deadline.split(' ');
+  return date === playDate ? time : `${formatDate(date)}, ${time}`;
+}

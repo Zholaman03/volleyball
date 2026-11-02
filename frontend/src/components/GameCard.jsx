@@ -23,7 +23,13 @@ export default function GameCard({ game, onRegister, closedLabel }) {
       <div className="card__top">
         <span className={`badge badge--${game.format}`}>{game.format_label}</span>
         <span className="card__price">
-          {formatPrice(game.price)} <small>адам басына</small>
+          {game.is_free ? (
+            'Тегін'
+          ) : (
+            <>
+              {formatPrice(game.price)} <small>адам басына</small>
+            </>
+          )}
         </span>
       </div>
 

@@ -21,7 +21,7 @@ function GameRow({ game }) {
         <b>
           {game.registered_count}/{game.capacity}
         </b>
-        <span>{game.paid_count} төледі</span>
+        <span>{game.is_free ? 'тегін' : `${game.paid_count} төледі`}</span>
       </div>
     </Link>
   );
