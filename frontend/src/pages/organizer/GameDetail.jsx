@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { addParticipant, deleteGame, orgGame, removeParticipant, setPaid } from '../../api';
 import { formatDuration, formatPrice } from '../../components/GameCard.jsx';
 import SharePanel from '../../components/SharePanel.jsx';
+import { paymentMessage } from '../../share';
 import { normalizePhone } from '../../phone';
 import {
   PHONE_PREFIX,
@@ -157,6 +158,12 @@ export default function GameDetail() {
         </div>
       </div>
 
+      <p className="pay-line">
+        {game.payment_info
+          ? `Төлем: ${game.payment_info}`
+          : 'Төлем мәліметі жоқ. «Өзгерту» арқылы Kaspi нөмірін қосыңыз.'}
+      </p>
+
       <div className="stats">
         <div className="stat">
           <b>
@@ -195,8 +202,13 @@ export default function GameDetail() {
                 <span className="person__n">{i + 1}</span>
                 <div className="person__info">
                   <strong>{r.name}</strong>
-                  <a href={whatsappLink(r.phone)} target="_blank" rel="noreferrer">
-                    {formatPhoneInput(r.phone)} · WhatsApp
+                  <a
+                    href={whatsappLink(r.phone, r.paid ? undefined : paymentMessage(game, r))}
+                    target="_blank"
+                    rel="noreferrer"
+                    title={r.paid ? 'WhatsApp-та жазу' : 'Төлем туралы WhatsApp-та жазу'}
+                  >
+                    {formatPhoneInput(r.phone)} · {r.paid ? 'WhatsApp' : 'төлемді еске салу'}
                   </a>
                 </div>
                 <span className="person__gender">{GENDER[r.gender]}</span>

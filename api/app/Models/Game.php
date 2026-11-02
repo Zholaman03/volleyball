@@ -30,6 +30,7 @@ class Game extends Model
         'venue_name',
         'venue_address',
         'price',
+        'payment_info',
         'teams_count',
         'capacity',
         'organizer_name',

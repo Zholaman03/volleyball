@@ -24,6 +24,7 @@ class GameSeeder extends Seeder
                 'format' => 'mixed', 'start_time' => '22:00:00', 'duration_minutes' => 120,
                 'venue_name' => 'Arena Sport', 'venue_address' => 'Абай к-сі 12',
                 'price' => 1800, 'teams_count' => 3, 'capacity' => 18,
+                'payment_info' => 'Kaspi: +7 700 000 00 00 · Ерлан А.',
                 'male' => 9, 'female' => 9,
             ],
             [
@@ -31,6 +32,7 @@ class GameSeeder extends Seeder
                 'format' => '4_2', 'start_time' => '20:00:00', 'duration_minutes' => 120,
                 'venue_name' => 'Нұр спортзалы', 'venue_address' => 'Satpayev к-сі 45',
                 'price' => 1800, 'teams_count' => 2, 'capacity' => 12,
+                'payment_info' => 'Kaspi: +7 700 000 00 01 · Айгерім Қ.',
                 'male' => 5, 'female' => 2,
             ],
             [
@@ -38,6 +40,7 @@ class GameSeeder extends Seeder
                 'format' => 'girls', 'start_time' => '19:00:00', 'duration_minutes' => 90,
                 'venue_name' => 'Олимп', 'venue_address' => 'Тәуелсіздік д-лы 7',
                 'price' => 1500, 'teams_count' => 3, 'capacity' => 18,
+                'payment_info' => 'Kaspi: +7 700 000 00 01 · Айгерім Қ.',
                 'male' => 0, 'female' => 11,
             ],
             [
@@ -45,6 +48,7 @@ class GameSeeder extends Seeder
                 'format' => 'boys', 'start_time' => '21:00:00', 'duration_minutes' => 120,
                 'venue_name' => 'Arena Sport', 'venue_address' => 'Абай к-сі 12',
                 'price' => 2000, 'teams_count' => 2, 'capacity' => 12,
+                'payment_info' => 'Kaspi: +7 700 000 00 00 · Ерлан А.',
                 'male' => 12, 'female' => 0,
             ],
         ];

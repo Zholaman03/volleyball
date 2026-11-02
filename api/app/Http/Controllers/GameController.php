@@ -68,6 +68,7 @@ class GameController extends Controller
             'message'          => $result['message'],
             'registered_count' => $result['registered_count'],
             'capacity'         => $result['capacity'],
+            'payment_info'     => $game->payment_info, // төлем мәліметі тек тіркелгеннен кейін беріледі
         ], 201);
     }
 }

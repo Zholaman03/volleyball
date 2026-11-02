@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { registerToGame } from '../api';
 import { normalizePhone } from '../phone';
+import { copyText } from '../share';
 import { PHONE_PREFIX, formatPhoneInput } from '../utils';
 import { formatPrice } from './GameCard.jsx';
 
@@ -19,6 +20,15 @@ export default function RegisterModal({ game, onClose, onDone }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [payment, setPayment] = useState(''); // ұйымдастырушының төлем мәліметі (тіркелгеннен кейін келеді)
+  const [copied, setCopied] = useState(false);
+
+  async function copyPayment() {
+    if (await copyText(payment)) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  }
 
   const set = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
 
@@ -45,7 +55,8 @@ export default function RegisterModal({ game, onClose, onDone }) {
     setSubmitting(true);
     setError('');
     try {
-      await registerToGame(game.id, { ...form, phone });
+      const res = await registerToGame(game.id, { ...form, phone });
+      setPayment(res.payment_info ?? '');
       setSuccess(true);
       onDone();
     } catch (err) {
@@ -69,8 +80,25 @@ export default function RegisterModal({ game, onClose, onDone }) {
             <h2>Тіркелдіңіз!</h2>
             <p>
               {game.start_time}–{game.end_time}, {game.venue_name}. Төлем: {formatPrice(game.price)}.
-              Ұйымдастырушы <b>{game.organizer_name}</b> сізбен WhatsApp арқылы байланысады.
             </p>
+            {payment ? (
+              <>
+                <div className="pay">
+                  <span>Төлем мәліметі</span>
+                  <strong>{payment}</strong>
+                  <button type="button" className="btn btn--ghost" onClick={copyPayment}>
+                    {copied ? 'Көшірілді ✓' : 'Көшіру'}
+                  </button>
+                </div>
+                <p>
+                  Төлегеннен кейін чекті ұйымдастырушыға (<b>{game.organizer_name}</b>) WhatsApp арқылы жіберіңіз.
+                </p>
+              </>
+            ) : (
+              <p>
+                Ұйымдастырушы <b>{game.organizer_name}</b> төлем туралы сізбен WhatsApp арқылы байланысады.
+              </p>
+            )}
             <button className="btn" onClick={onClose}>
               Жақсы
             </button>

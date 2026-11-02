@@ -12,6 +12,7 @@ const EMPTY = {
   venue_name: '',
   venue_address: '',
   price: 1800,
+  payment_info: '',
   teams_count: 3,
 };
 
@@ -41,6 +42,7 @@ function toForm(g, playDate) {
     venue_name: g.venue_name,
     venue_address: g.venue_address,
     price: g.price,
+    payment_info: g.payment_info ?? '',
     teams_count: g.teams_count,
   };
 }
@@ -164,6 +166,18 @@ export default function GameForm() {
         <label className="field">
           <span>Зал мекенжайы</span>
           <input type="text" value={form.venue_address} onChange={set('venue_address')} required maxLength={255} />
+        </label>
+
+        <label className="field">
+          <span>Төлем мәліметі (міндетті емес)</span>
+          <input
+            type="text"
+            value={form.payment_info}
+            onChange={set('payment_info')}
+            placeholder="Kaspi: +7 701 123 45 67 (Ерлан А.)"
+            maxLength={255}
+          />
+          <small className="hint">Ойыншы тіркелгеннен кейін осыны көреді. Ашық тізімде көрсетілмейді.</small>
         </label>
 
         <label className="field">
