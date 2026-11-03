@@ -1,0 +1,50 @@
+# Бір доменде: / — React (статика), /api/ — Laravel (PHP-FPM). setup.sh __SERVER_NAME__ орнын толтырады.
+# HTTPS-ті certbot --nginx осы файлға өзі қосады.
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name __SERVER_NAME__;
+
+    root /var/www/volleyball/frontend/dist;
+    index index.html;
+    client_max_body_size 1m;
+
+    gzip on;
+    gzip_min_length 1024;
+    gzip_types text/css application/javascript application/json image/svg+xml;
+
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-Frame-Options DENY always;
+    add_header Referrer-Policy strict-origin-when-cross-origin always;
+
+    # Vite файл аттарына хэш қосады, сондықтан ұзақ уақыт кэштеуге болады.
+    # Ескерту: location ішінде add_header қолданбаймыз, әйтпесе nginx жоғарғы қауіпсіздік тақырыптарын мұраламайды.
+    location /assets/ {
+        try_files $uri =404;
+        expires 1y;
+    }
+
+    # index.html әрқашан жаңа болуы керек (жаңа build-тің хэшті файлдарына сілтейді)
+    location = /index.html {
+        expires -1;
+    }
+
+    # API: барлық /api/... сұранысы Laravel-дің public/index.php файлына барады
+    location /api/ {
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME /var/www/volleyball/api/public/index.php;
+        fastcgi_param SCRIPT_NAME /index.php;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_read_timeout 30s;
+    }
+
+    # React Router: /games/12, /organizer, /cancel/... — бәрі index.html-ге
+    location / {
+        try_files $uri /index.html;
+    }
+
+    # .env, .git сияқты жасырын файлдарға жол жоқ (certbot үшін .well-known қалады)
+    location ~ /\.(?!well-known) {
+        deny all;
+    }
+}
