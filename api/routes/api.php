@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Route;
 // ---- Қонақтарға арналған (аккаунтсыз) ----
 Route::get('/games', [GameController::class, 'index']);
 Route::get('/games/{game}', [GameController::class, 'show']);
+Route::get('/games/{game}/participants', [GameController::class, 'participants'])
+    ->middleware('throttle:60,1');
 Route::post('/games/{game}/register', [GameController::class, 'register'])
     ->middleware('throttle:20,1');
 

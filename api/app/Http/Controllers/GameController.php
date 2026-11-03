@@ -7,6 +7,7 @@ use App\Models\Game;
 use App\Models\Registration;
 use App\Rules\WhatsAppNumber;
 use App\Services\RegistrationService;
+use App\Support\DisplayName;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -44,6 +45,30 @@ class GameController extends Controller
         ]);
 
         return new GameResource($game);
+    }
+
+    /**
+     * GET /api/games/{game}/participants — ойыншыларға арналған ашық тізім.
+     * Тек қысқартылған аты («Айдос Н.») және жынысы; телефон мен төлем статусы ЕШҚАШАН берілмейді.
+     * Бас тартқандар көрінбейді.
+     */
+    public function participants(Game $game): JsonResponse
+    {
+        $list = fn ($relation) => $game->{$relation}()
+            ->orderBy('id')
+            ->get(['id', 'name', 'gender'])
+            ->values()
+            ->map(fn ($r, $i) => [
+                'position' => $i + 1,
+                'name'     => DisplayName::short($r->name),
+                'gender'   => $r->gender,
+            ]);
+
+        return response()->json(['data' => [
+            'registered' => $list('registrations'),
+            'waitlist'   => $list('waitlist'),
+            'capacity'   => $game->capacity,
+        ]]);
     }
 
     /** POST /api/games/{game}/register */

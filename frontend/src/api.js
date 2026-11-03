@@ -62,6 +62,8 @@ export const fetchGames = async (date) =>
 
 export const fetchGame = async (id) => (await request(`/games/${id}`)).data;
 
+export const fetchParticipants = async (id) => (await request(`/games/${id}/participants`)).data;
+
 export const registerToGame = (gameId, payload) =>
   request(`/games/${gameId}/register`, { method: 'POST', body: payload });
 
