@@ -40,7 +40,7 @@ export default function AdminUsers() {
       <div className="row__main">
         <div className="row__time">
           <strong>{u.name}</strong>
-          <span>{u.email}</span>
+          <span className="row__email">{u.email}</span>
         </div>
         <div className="row__meta">{t('Ойын: {n}', { n: u.games_count })}</div>
       </div>
