@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { orgGames } from '../../api';
+import { useLang } from '../../i18n.jsx';
 import { formatDate, todayStr } from '../../utils';
 
 function GameRow({ game }) {
+  const { t } = useLang();
   return (
     <Link to={`/organizer/games/${game.id}`} className="row">
       <div className="row__main">
@@ -21,13 +23,14 @@ function GameRow({ game }) {
         <b>
           {game.registered_count}/{game.capacity}
         </b>
-        <span>{game.is_free ? 'тегін' : `${game.paid_count} төледі`}</span>
+        <span>{game.is_free ? t('тегін') : t('{n} төледі', { n: game.paid_count })}</span>
       </div>
     </Link>
   );
 }
 
 export default function Dashboard() {
+  const { t } = useLang();
   const [games, setGames] = useState(null);
   const [error, setError] = useState('');
 
@@ -46,22 +49,22 @@ export default function Dashboard() {
   return (
     <>
       <div className="head">
-        <h1>Менің ойындарым</h1>
+        <h1>{t('Менің ойындарым')}</h1>
         <Link to="/organizer/games/new" className="btn btn--link">
-          + Ойын қосу
+          {t('+ Ойын қосу')}
         </Link>
       </div>
 
       {error && <p className="state state--error">{error}</p>}
-      {!games && !error && <p className="state">Жүктелуде…</p>}
+      {!games && !error && <p className="state">{t('Жүктелуде…')}</p>}
 
       {games && games.length === 0 && (
-        <p className="state">Әзірге ойын жоқ. «Ойын қосу» батырмасын басыңыз.</p>
+        <p className="state">{t('Әзірге ойын жоқ. «Ойын қосу» батырмасын басыңыз.')}</p>
       )}
 
       {upcoming.length > 0 && (
         <section className="block">
-          <h2 className="block__title">Алдағы ойындар</h2>
+          <h2 className="block__title">{t('Алдағы ойындар')}</h2>
           <div className="rows">
             {upcoming.map((g) => (
               <GameRow key={g.id} game={g} />
@@ -72,7 +75,7 @@ export default function Dashboard() {
 
       {past.length > 0 && (
         <section className="block">
-          <h2 className="block__title">Өткен ойындар</h2>
+          <h2 className="block__title">{t('Өткен ойындар')}</h2>
           <div className="rows rows--past">
             {past.map((g) => (
               <GameRow key={g.id} game={g} />

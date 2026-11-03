@@ -11,7 +11,7 @@ class EnsureAdmin
     public function handle(Request $request, Closure $next): Response
     {
         if (! $request->user()?->is_admin) {
-            return response()->json(['message' => 'Бұл бөлім тек админге арналған.'], 403);
+            return response()->json(['message' => __('Бұл бөлім тек админге арналған.')], 403);
         }
 
         return $next($request);

@@ -222,3 +222,12 @@
 .day--active { background: var(--accent); border-color: var(--accent); color: #fff; }
 .day--active b { color: #fff; }
 .day--active:hover { border-color: var(--accent); }
+
+/* Тіл ауыстырғыш */
+.toprow { gap: 16px; align-items: center; }
+.langs { display: inline-flex; gap: 2px; margin-left: auto; }
+.toprow .langs { margin-left: 0; }
+.toprow--left .langs { margin-left: auto; }
+.langs__item { background: none; border: 0; padding: 4px 6px; font: inherit; font-size: 12px; letter-spacing: .04em; color: var(--muted); cursor: pointer; }
+.langs__item:hover { color: var(--text); }
+.langs__item--active { color: var(--text); font-weight: 600; }

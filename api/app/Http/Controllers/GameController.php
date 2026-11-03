@@ -55,9 +55,9 @@ class GameController extends Controller
             'gender' => ['required', 'in:male,female'],
             'waitlist' => ['sometimes', 'boolean'], // орын жоқ болса, күту тізіміне жазылу
         ], [
-            'name.required'   => 'Атыңызды жазыңыз.',
-            'phone.required'  => 'WhatsApp нөміріңізді жазыңыз.',
-            'gender.required' => 'Жынысыңызды таңдаңыз.',
+            'name.required'   => __('Атыңызды жазыңыз.'),
+            'phone.required'  => __('WhatsApp нөміріңізді жазыңыз.'),
+            'gender.required' => __('Жынысыңызды таңдаңыз.'),
         ]);
 
         $waitlist = (bool) ($data['waitlist'] ?? false);

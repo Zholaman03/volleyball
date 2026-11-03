@@ -2,9 +2,11 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { adminUsers, approveUser, revokeUser } from '../../api';
 import { useAuth } from '../../auth.jsx';
+import { useLang } from '../../i18n.jsx';
 
 export default function AdminUsers() {
   const { user } = useAuth();
+  const { t } = useLang();
   const [users, setUsers] = useState(null);
   const [error, setError] = useState('');
 
@@ -40,23 +42,23 @@ export default function AdminUsers() {
           <strong>{u.name}</strong>
           <span>{u.email}</span>
         </div>
-        <div className="row__meta">Ойын: {u.games_count}</div>
+        <div className="row__meta">{t('Ойын: {n}', { n: u.games_count })}</div>
       </div>
       <div className="row__side">
         {u.approved ? (
           <button
             className="link link--danger"
             onClick={() => {
-              if (window.confirm(`${u.name} бекітуін алып тастау керек пе? Жаңа ойын қоса алмайды.`)) {
+              if (window.confirm(t('{name} бекітуін алып тастау керек пе? Жаңа ойын қоса алмайды.', { name: u.name }))) {
                 act(revokeUser, u.id);
               }
             }}
           >
-            Бекітуді алу
+            {t('Бекітуді алу')}
           </button>
         ) : (
           <button className="btn" onClick={() => act(approveUser, u.id)}>
-            Бекіту
+            {t('Бекіту')}
           </button>
         )}
       </div>
@@ -66,26 +68,26 @@ export default function AdminUsers() {
   return (
     <>
       <Link to="/organizer" className="back">
-        ← Кабинет
+        {t('← Кабинет')}
       </Link>
       <div className="head">
-        <h1>Ұйымдастырушылар</h1>
+        <h1>{t('Ұйымдастырушылар')}</h1>
       </div>
 
       {error && <p className="state state--error">{error}</p>}
-      {!users && !error && <p className="state">Жүктелуде…</p>}
-      {users && users.length === 0 && <p className="state">Әзірге ұйымдастырушы жоқ.</p>}
+      {!users && !error && <p className="state">{t('Жүктелуде…')}</p>}
+      {users && users.length === 0 && <p className="state">{t('Әзірге ұйымдастырушы жоқ.')}</p>}
 
       {pending.length > 0 && (
         <section className="block">
-          <h2 className="block__title">Бекітуді күтіп тұр ({pending.length})</h2>
+          <h2 className="block__title">{t('Бекітуді күтіп тұр ({n})', { n: pending.length })}</h2>
           <div className="rows">{pending.map(row)}</div>
         </section>
       )}
 
       {approved.length > 0 && (
         <section className="block">
-          <h2 className="block__title">Бекітілген</h2>
+          <h2 className="block__title">{t('Бекітілген')}</h2>
           <div className="rows">{approved.map(row)}</div>
         </section>
       )}

@@ -26,7 +26,10 @@ final class PhoneNumber
     /** +7 емес нөмірлер: халықаралық E.164 */
     private const INTERNATIONAL = '/^\+[1-9]\d{7,14}$/';
 
-    public const ERROR = 'WhatsApp нөмірін дұрыс енгізіңіз. Мысалы: +7 701 123 45 67 немесе халықаралық: +996 555 123 456.';
+    public static function error(): string
+    {
+        return __('WhatsApp нөмірін дұрыс енгізіңіз. Мысалы: +7 701 123 45 67 немесе халықаралық: +996 555 123 456.');
+    }
 
     /** Дұрыс болса E.164 қайтарады (+77011234567), әйтпесе null */
     public static function normalize(string $input): ?string

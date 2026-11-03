@@ -17,6 +17,12 @@ class Game extends Model
         '2_4'   => '2/4 (2 ұл, 4 қыз)',
     ];
 
+    /** Форматтың аты ағымдағы тілде (белгісіз формат болса, кодтың өзі) */
+    public static function formatLabel(string $format): string
+    {
+        return isset(self::FORMATS[$format]) ? __(self::FORMATS[$format]) : $format;
+    }
+
     /** Бір командадағы ойыншы саны */
     public const TEAM_SIZE = 6;
 
