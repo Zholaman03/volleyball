@@ -4,8 +4,8 @@ import { fetchGames } from '../api';
 import GameCard from '../components/GameCard.jsx';
 import LangSwitch from '../components/LangSwitch.jsx';
 import RegisterModal from '../components/RegisterModal.jsx';
-import { dateLocale, useLang } from '../i18n.jsx';
-import { todayStr } from '../utils';
+import { useLang } from '../i18n.jsx';
+import { longDate, todayStr, weekdayShort } from '../utils';
 
 const FILTERS = [
   { key: 'all', label: 'Барлығы' },
@@ -35,9 +35,9 @@ function buildDays(today, t) {
           ? t('Бүгін')
           : i === 1
             ? t('Ертең')
-            : d.toLocaleDateString(dateLocale(), { weekday: 'short' }),
+            : weekdayShort(d),
       day: d.getDate(),
-      long: d.toLocaleDateString(dateLocale(), { day: 'numeric', month: 'long', weekday: 'long' }),
+      long: longDate(d),
     };
   });
 }
@@ -105,7 +105,6 @@ export default function Home() {
       </div>
 
       <header className="hero">
-        <span className="hero__eyebrow">{eyebrow}</span>
         <h1>{t('Волейбол ойындары')}</h1>
         <p>{t('Өзіңе ыңғайлы ойынды таңда да, бір минутта тіркел.')}</p>
       </header>
@@ -135,6 +134,8 @@ export default function Home() {
           </button>
         ))}
       </nav>
+
+      <h2 className="daytitle">{eyebrow}</h2>
 
       <main className="list">
         {status === 'loading' && <p className="state">{t('Жүктелуде…')}</p>}

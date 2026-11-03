@@ -233,7 +233,8 @@ export default function GameDetail() {
                     rel="noreferrer"
                     title={game.is_free || r.paid ? t('WhatsApp-та жазу') : t('Төлем туралы WhatsApp-та жазу')}
                   >
-                    {formatPhoneInput(r.phone)} · {game.is_free || r.paid ? 'WhatsApp' : t('төлемді еске салу')}
+                    {formatPhoneInput(r.phone)}
+                    <span className="person__act"> · {game.is_free || r.paid ? 'WhatsApp' : t('төлемді еске салу')}</span>
                   </a>
                 </div>
                 <span className="person__gender">{t(GENDER[r.gender])}</span>
@@ -279,7 +280,8 @@ export default function GameDetail() {
                   <div className="person__info">
                     <strong>{r.name}</strong>
                     <a href={whatsappLink(r.phone, msg)} target="_blank" rel="noreferrer">
-                      {formatPhoneInput(r.phone)} · {t('орын босады деп жазу')}
+                      {formatPhoneInput(r.phone)}
+                      <span className="person__act"> · {t('орын босады деп жазу')}</span>
                     </a>
                   </div>
                   <span className="person__gender">{t(GENDER[r.gender])}</span>

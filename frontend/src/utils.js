@@ -1,4 +1,4 @@
-import { dateLocale } from './i18n.jsx';
+import { dateLocale, getLang } from './i18n.jsx';
 import { normalizePhone } from './phone';
 
 export const FORMAT_OPTIONS = [
@@ -18,9 +18,30 @@ export function todayStr() {
   return new Date().toLocaleDateString('sv-SE');
 }
 
+// Қазақша күн/ай атаулары қолмен жазылған: браузердің «kk» деректері әрқашан бола бермейді
+// (болмаса «M11 3, Tue» сияқты ағылшынша шығады). Орысша үшін браузердің өз деректері жеткілікті.
+const KK_MONTHS = ['қаңтар', 'ақпан', 'наурыз', 'сәуір', 'мамыр', 'маусым', 'шілде', 'тамыз', 'қыркүйек', 'қазан', 'қараша', 'желтоқсан'];
+const KK_WEEKDAYS_SHORT = ['жс', 'дс', 'сс', 'ср', 'бс', 'жм', 'сб'];
+const KK_WEEKDAYS_LONG = ['жексенбі', 'дүйсенбі', 'сейсенбі', 'сәрсенбі', 'бейсенбі', 'жұма', 'сенбі'];
+
+const isRu = () => getLang() === 'ru';
+
+/** "2026-11-05" → «5 қараша, бс» / «чт, 5 ноября» */
 export function formatDate(iso) {
   const d = new Date(`${iso}T00:00:00`);
-  return d.toLocaleDateString(dateLocale(), { day: 'numeric', month: 'long', weekday: 'short' });
+  if (isRu()) return d.toLocaleDateString(dateLocale(), { day: 'numeric', month: 'long', weekday: 'short' });
+  return `${d.getDate()} ${KK_MONTHS[d.getMonth()]}, ${KK_WEEKDAYS_SHORT[d.getDay()]}`;
+}
+
+/** Қысқа апта күні: «дс» / «пн» */
+export function weekdayShort(d) {
+  return isRu() ? d.toLocaleDateString(dateLocale(), { weekday: 'short' }) : KK_WEEKDAYS_SHORT[d.getDay()];
+}
+
+/** Толық күн: «3 қараша, дүйсенбі» / «понедельник, 3 ноября» */
+export function longDate(d) {
+  if (isRu()) return d.toLocaleDateString(dateLocale(), { day: 'numeric', month: 'long', weekday: 'long' });
+  return `${d.getDate()} ${KK_MONTHS[d.getMonth()]}, ${KK_WEEKDAYS_LONG[d.getDay()]}`;
 }
 
 /* ---- WhatsApp нөмірі ---- */

@@ -61,7 +61,7 @@ export default function CancelPage() {
         <h1>{t('Бас тарту')}</h1>
       </header>
 
-      <main className="list">
+      <main className="list list--one">
         {state === 'loading' && <p className="state">{t('Жүктелуде…')}</p>}
         {state === 'notfound' && <p className="state">{t('Сілтеме дұрыс емес немесе тіркеу табылмады.')}</p>}
         {state === 'error' && (

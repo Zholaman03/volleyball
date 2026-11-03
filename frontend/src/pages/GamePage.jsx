@@ -49,7 +49,7 @@ export default function GamePage() {
         <h1>{t('Волейбол ойыны')}</h1>
       </header>
 
-      <main className="list">
+      <main className="list list--one">
         {status === 'loading' && <p className="state">{t('Жүктелуде…')}</p>}
         {status === 'notfound' && (
           <p className="state">

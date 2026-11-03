@@ -1,4 +1,5 @@
 import { tr, useLang } from '../i18n.jsx';
+import { TEAM_SIZE } from '../utils';
 import Participants from './Participants.jsx';
 import ShareButton from './ShareButton.jsx';
 
@@ -14,10 +15,27 @@ export function formatPrice(price) {
   return `${price.toLocaleString('ru-RU')} ₸`;
 }
 
+/** Орындар: әр команда — 6 нүкте. Толған орын — қара нүкте. Командалық құрылым бірден көрінеді */
+function Dots({ taken, capacity }) {
+  const teams = Math.ceil(capacity / TEAM_SIZE);
+  return (
+    <div className="dots" role="img" aria-label={`${taken}/${capacity}`}>
+      {Array.from({ length: teams }, (_, team) => (
+        <span className="dots__team" key={team}>
+          {Array.from({ length: TEAM_SIZE }, (_, i) => {
+            const n = team * TEAM_SIZE + i;
+            if (n >= capacity) return null;
+            return <i key={i} className={n < taken ? 'dot dot--on' : 'dot'} />;
+          })}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 /** closedLabel: ойын тіркеуге жабық болса (мысалы өтіп кетсе), батырмадағы жазу */
 export default function GameCard({ game, onRegister, closedLabel, participantsOpen = false }) {
   const { t } = useLang();
-  const percent = Math.min(100, Math.round((game.registered_count / game.capacity) * 100));
   const left = game.capacity - game.registered_count;
   const closed = Boolean(closedLabel); // тек өтіп кеткен ойын жабық; толған ойынға күту тізіміне жазылуға болады
 
@@ -49,6 +67,7 @@ export default function GameCard({ game, onRegister, closedLabel, participantsOp
       </div>
 
       <div className="spots">
+        <Dots taken={game.registered_count} capacity={game.capacity} />
         <div className="spots__row">
           <span>
             <b>
@@ -56,16 +75,13 @@ export default function GameCard({ game, onRegister, closedLabel, participantsOp
             </b>{' '}
             · {t('{n} команда', { n: game.teams_count })}
           </span>
-          <span className="spots__left">
+          <span className={`spots__left ${!game.is_full && left <= 3 ? 'spots__left--low' : ''}`}>
             {game.is_full
               ? game.waitlist_count > 0
                 ? t('Орын жоқ · күтуде: {n}', { n: game.waitlist_count })
                 : t('Орын жоқ')
               : t('{n} орын қалды', { n: left })}
           </span>
-        </div>
-        <div className="bar" role="progressbar" aria-valuenow={percent} aria-valuemin="0" aria-valuemax="100">
-          <div className="bar__fill" style={{ width: `${percent}%` }} />
         </div>
       </div>
 
