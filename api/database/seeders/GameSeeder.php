@@ -16,6 +16,16 @@ class GameSeeder extends Seeder
             'aigerim' => User::firstOrCreate(['email' => 'aigerim@example.com'], ['name' => 'Айгерім', 'password' => 'password']),
         ];
 
+        // Демо ұйымдастырушылар бекітілген болсын (is_admin/approved_at fillable емес, сондықтан forceFill)
+        foreach ($organizers as $organizer) {
+            $organizer->forceFill(['approved_at' => $organizer->approved_at ?? now()])->save();
+        }
+
+        // Демо админ: admin@example.com / password. Бекітуді күтіп тұрған демо ұйымдастырушы: new@example.com
+        User::firstOrCreate(['email' => 'admin@example.com'], ['name' => 'Админ', 'password' => 'password'])
+            ->forceFill(['is_admin' => true, 'approved_at' => now()])->save();
+        User::firstOrCreate(['email' => 'new@example.com'], ['name' => 'Жаңа ұйымдастырушы', 'password' => 'password']);
+
         $today = today()->toDateString();
 
         $games = [

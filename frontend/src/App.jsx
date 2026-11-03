@@ -7,6 +7,7 @@ import OrganizerLayout from './pages/organizer/OrganizerLayout.jsx';
 import Dashboard from './pages/organizer/Dashboard.jsx';
 import GameForm from './pages/organizer/GameForm.jsx';
 import GameDetail from './pages/organizer/GameDetail.jsx';
+import AdminUsers from './pages/organizer/AdminUsers.jsx';
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
         <Route path="games/new" element={<GameForm />} />
         <Route path="games/:id" element={<GameDetail />} />
         <Route path="games/:id/edit" element={<GameForm />} />
+        <Route path="admin" element={<AdminUsers />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

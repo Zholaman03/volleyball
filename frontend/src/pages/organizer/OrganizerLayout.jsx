@@ -14,6 +14,11 @@ export default function OrganizerLayout() {
           Кабинет
         </Link>
         <div className="topbar__right">
+          {user.is_admin && (
+            <Link to="/organizer/admin" className="link">
+              Админ
+            </Link>
+          )}
           <span>{user.name}</span>
           <button className="link" onClick={logout}>
             Шығу
@@ -21,7 +26,16 @@ export default function OrganizerLayout() {
         </div>
       </header>
 
-      <Outlet />
+      {user.approved ? (
+        <Outlet />
+      ) : (
+        <div className="state">
+          <h2>Аккаунт бекітуді күтуде</h2>
+          <p>
+            Админ аккаунтыңызды бекіткен соң ойын қоса аласыз. Бекітілгенде бетті жаңартыңыз немесе қайта кіріңіз.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

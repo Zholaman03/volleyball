@@ -93,3 +93,8 @@ export const promoteParticipant = (gameId, registrationId) =>
   request(`/organizer/games/${gameId}/registrations/${registrationId}/promote`, { method: 'POST' });
 export const removeParticipant = (gameId, registrationId) =>
   request(`/organizer/games/${gameId}/registrations/${registrationId}`, { method: 'DELETE' });
+
+/* ---- Админ ---- */
+export const adminUsers = async () => (await request('/admin/users')).data;
+export const approveUser = (id) => request(`/admin/users/${id}/approve`, { method: 'POST' });
+export const revokeUser = (id) => request(`/admin/users/${id}/revoke`, { method: 'POST' });

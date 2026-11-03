@@ -95,7 +95,10 @@ Production-да сайтты қызмет ететін сервер барлық
 
 | Әдіс | URL | Сипаттама |
 |------|-----|-----------|
-| GET    | `/api/organizer/games` | Өз ойындары |
+| GET    | `/api/admin/users` | Админ: ұйымдастырушылар тізімі (бекітілмегендер жоғарыда) |
+| POST   | `/api/admin/users/{id}/approve` | Админ: бекіту |
+| POST   | `/api/admin/users/{id}/revoke` | Админ: бекітуді алу |
+| GET    | `/api/organizer/games` | Өз ойындары (бекітілген аккаунтқа ғана; `/api/organizer/*` барлығы) |
 | POST   | `/api/organizer/games` | Ойын қосу. `payment_info` (міндетті емес, ≤ 255 таңба). `payment_deadline_hours` (міндетті емес, 1–168). `price: 0` — тегін ойын (төлем өрістері өздігінен тазаланады). `repeat_weeks` (0–12, міндетті емес): қосымша қанша апта қайталау. Жауап: `data` — бірінші ойын, `meta.created` — қосылған ойын саны |
 | GET    | `/api/organizer/games/{id}` | Ойын + қатысушылар |
 | PUT    | `/api/organizer/games/{id}` | Өзгерту |
@@ -104,6 +107,18 @@ Production-да сайтты қызмет ететін сервер барлық
 | PATCH  | `/api/organizer/games/{id}/registrations/{rid}` | Төлем белгісі: `{"paid": true}` |
 | POST   | `/api/organizer/games/{id}/registrations/{rid}/promote` | Күту тізімінен ойынға қосу (орын бар болса) |
 | DELETE | `/api/organizer/games/{id}/registrations/{rid}` | Қатысушыны шығару |
+
+## Админ және ұйымдастырушыны бекіту
+
+Жаңа ұйымдастырушы тіркелгенде аккаунты «бекітуді күтуде» күйінде болады: кабинетке кіре алады, бірақ ойын қоса алмайды (`403`, `code: pending_approval`). Админ `/organizer/admin` бетінде «Бекіту» басады. Бекітуді кейін алып тастауға да болады: бұрынғы ойындар қалады, жаңа ойын қосу жабылады.
+
+Бірінші админді консольмен тағайындаңыз (алдымен сайтта тіркеліңіз):
+
+```
+php artisan user:make-admin email@example.com
+```
+
+Демо дерек (`migrate:fresh --seed`): `admin@example.com` / `password` (админ), `new@example.com` (бекітуді күтіп тұр). Миграциядан кейін бұрыннан бар ұйымдастырушылар өздігінен бекітілген болады.
 
 ## Ойын форматтары
 
