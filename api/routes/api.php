@@ -1,9 +1,12 @@
 <?php
 
+use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\OrganizerGameController;
 use App\Http\Controllers\RegistrationController;
+use App\Http\Middleware\EnsureAdmin;
+use App\Http\Middleware\EnsureApproved;
 use Illuminate\Support\Facades\Route;
 
 // ---- Қонақтарға арналған (аккаунтсыз) ----
@@ -24,7 +27,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/auth/me', [AuthController::class, 'me']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
 
-    Route::prefix('organizer')->group(function () {
+    // Админ: ұйымдастырушыларды бекіту
+    Route::prefix('admin')->middleware(EnsureAdmin::class)->group(function () {
+        Route::get('/users', [AdminUserController::class, 'index']);
+        Route::post('/users/{user}/approve', [AdminUserController::class, 'approve']);
+        Route::post('/users/{user}/revoke', [AdminUserController::class, 'revoke']);
+    });
+
+    Route::prefix('organizer')->middleware(EnsureApproved::class)->group(function () {
         Route::get('/games', [OrganizerGameController::class, 'index']);
         Route::post('/games', [OrganizerGameController::class, 'store']);
         Route::get('/games/{game}', [OrganizerGameController::class, 'show']);
