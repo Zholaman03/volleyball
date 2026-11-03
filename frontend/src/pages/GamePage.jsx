@@ -71,6 +71,7 @@ export default function GamePage() {
           <GameCard
             game={game}
             closedLabel={isPast ? t('Өтіп кетті') : undefined}
+            participantsOpen
             onRegister={() => setRegistering(true)}
           />
         )}

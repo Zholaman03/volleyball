@@ -78,6 +78,7 @@ Production-да сайтты қызмет ететін сервер барлық
 |------|-----|-----------|
 | GET  | `/api/games` | Ойындар (`?date=YYYY-MM-DD`; берілмесе сервердің бүгіні) |
 | GET  | `/api/games/{id}` | Бір ойын |
+| GET | `/api/games/{id}/participants` | Ашық қатысушылар тізімі: `registered` және `waitlist` (`position`, қысқартылған `name`, `gender`). Телефон мен төлем статусы берілмейді |
 | POST | `/api/games/{id}/register` | Тіркелу: `name`, `phone`, `gender` (`male`/`female`), `waitlist` (міндетті емес: орын жоқ болса, күту тізіміне жазу; орын жоқта және `waitlist` жоқта жауап 409 + `full: true`). Жауапта `status` (`active`/`waitlist`), `cancel_token`, `waitlist_position`, `payment_info`, `payment_deadline` (`YYYY-MM-DD HH:MM`) және `is_free` қайтады (тегін ойында төлем мәліметі `null`) |
 | GET | `/api/registrations/{token}` | Ойыншының өз тіркеуі: `status` (`active`/`waitlist`/`cancelled`), `can_cancel`, `cancel_deadline`, ойын мәліметі |
 | POST | `/api/registrations/{token}/cancel` | Бас тарту (ойынға 3 сағат қалғанға дейін; күту тізімінен — ойын басталғанға дейін) |
@@ -119,6 +120,12 @@ php artisan user:make-admin email@example.com
 ```
 
 Демо дерек (`migrate:fresh --seed`): `admin@example.com` / `password` (админ), `new@example.com` (бекітуді күтіп тұр). Миграциядан кейін бұрыннан бар ұйымдастырушылар өздігінен бекітілген болады.
+
+## Ашық қатысушылар тізімі
+
+Карточкадағы «Қатысушылар (N)» батырмасы тізімді ашады; ойынның жеке бетінде (`/games/:id`) тізім бірден ашық тұрады, сондықтан сол сілтемемен бөлісуге болады. Тізімде қатысушылар мен күту тізімі (№ тәртібімен) көрінеді.
+
+Құпиялылық: аты сервер жағынан қысқартылады («Айдос Нұрлан Ерболұлы» → «Айдос Н.»), телефон мен төлем статусы ешқашан берілмейді, бас тартқандар көрінбейді.
 
 ## Тіл (қазақша / орысша)
 

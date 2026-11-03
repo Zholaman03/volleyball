@@ -231,3 +231,14 @@
 .langs__item { background: none; border: 0; padding: 4px 6px; font: inherit; font-size: 12px; letter-spacing: .04em; color: var(--muted); cursor: pointer; }
 .langs__item:hover { color: var(--text); }
 .langs__item--active { color: var(--text); font-weight: 600; }
+
+/* Ашық қатысушылар тізімі */
+.participants { margin-top: 12px; }
+.participants__toggle { font-size: 14px; }
+.participants__title { font-size: 13px; font-weight: 500; color: var(--muted); margin: 14px 0 6px; }
+.plist { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 6px; }
+.plist li { display: flex; align-items: baseline; gap: 10px; font-size: 15px; }
+.plist__n { width: 20px; color: var(--muted); font-size: 13px; text-align: right; }
+.plist__name { flex: 1; }
+.plist__g { color: var(--muted); font-size: 13px; }
+.plist--wait li { color: var(--muted); }

@@ -1,4 +1,5 @@
 import { tr, useLang } from '../i18n.jsx';
+import Participants from './Participants.jsx';
 import ShareButton from './ShareButton.jsx';
 
 export function formatDuration(minutes) {
@@ -14,7 +15,7 @@ export function formatPrice(price) {
 }
 
 /** closedLabel: ойын тіркеуге жабық болса (мысалы өтіп кетсе), батырмадағы жазу */
-export default function GameCard({ game, onRegister, closedLabel }) {
+export default function GameCard({ game, onRegister, closedLabel, participantsOpen = false }) {
   const { t } = useLang();
   const percent = Math.min(100, Math.round((game.registered_count / game.capacity) * 100));
   const left = game.capacity - game.registered_count;
@@ -67,6 +68,8 @@ export default function GameCard({ game, onRegister, closedLabel }) {
           <div className="bar__fill" style={{ width: `${percent}%` }} />
         </div>
       </div>
+
+      <Participants game={game} defaultOpen={participantsOpen} />
 
       <div className="card__bottom">
         <span className="organizer">
