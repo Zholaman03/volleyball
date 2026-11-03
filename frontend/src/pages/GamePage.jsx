@@ -1,13 +1,16 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { fetchGame } from '../api';
+import { useLang } from '../i18n.jsx';
 import GameCard from '../components/GameCard.jsx';
+import LangSwitch from '../components/LangSwitch.jsx';
 import RegisterModal from '../components/RegisterModal.jsx';
 import { formatDate, todayStr } from '../utils';
 
 /** Бір ойынның беті: сілтемемен бөлісілген ойын осында ашылады */
 export default function GamePage() {
   const { id } = useParams();
+  const { t } = useLang();
   const [game, setGame] = useState(null);
   const [status, setStatus] = useState('loading'); // loading | ready | notfound | error
   const [registering, setRegistering] = useState(false);
@@ -36,37 +39,38 @@ export default function GamePage() {
     <div className="page">
       <div className="toprow toprow--left">
         <Link to="/" className="toprow__link">
-          ← Барлық ойындар
+          {t('← Барлық ойындар')}
         </Link>
+        <LangSwitch />
       </div>
 
       <header className="hero">
-        <span className="hero__eyebrow">{game ? formatDate(game.play_date) : 'Волейбол ойыны'}</span>
-        <h1>Волейбол ойыны</h1>
+        <span className="hero__eyebrow">{game ? formatDate(game.play_date) : t('Волейбол ойыны')}</span>
+        <h1>{t('Волейбол ойыны')}</h1>
       </header>
 
       <main className="list">
-        {status === 'loading' && <p className="state">Жүктелуде…</p>}
+        {status === 'loading' && <p className="state">{t('Жүктелуде…')}</p>}
         {status === 'notfound' && (
           <p className="state">
-            Ойын табылмады. Ол өшірілген болуы мүмкін.{' '}
+            {t('Ойын табылмады. Ол өшірілген болуы мүмкін.')}{' '}
             <Link to="/" className="link">
-              Басқа ойындарды көру
+              {t('Басқа ойындарды көру')}
             </Link>
           </p>
         )}
         {status === 'error' && (
           <p className="state state--error">
-            Серверге қосыла алмадық.{' '}
+            {t('Серверге қосыла алмадық.')}{' '}
             <button className="link" onClick={() => load()}>
-              Қайта көру
+              {t('Қайта көру')}
             </button>
           </p>
         )}
         {status === 'ready' && (
           <GameCard
             game={game}
-            closedLabel={isPast ? 'Өтіп кетті' : undefined}
+            closedLabel={isPast ? t('Өтіп кетті') : undefined}
             onRegister={() => setRegistering(true)}
           />
         )}

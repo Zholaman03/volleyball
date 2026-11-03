@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth.jsx';
+import LangSwitch from '../../components/LangSwitch.jsx';
+import { useLang } from '../../i18n.jsx';
 
 export default function Login() {
   const { user, ready, login, register } = useAuth();
+  const { t } = useLang();
   const navigate = useNavigate();
 
   const [mode, setMode] = useState('login'); // login | register
@@ -35,21 +38,22 @@ export default function Login() {
     <div className="page page--narrow">
       <div className="toprow">
         <Link to="/" className="toprow__link">
-          ← Ойындарға оралу
+          {t('← Ойындарға оралу')}
         </Link>
+        <LangSwitch />
       </div>
 
       <form className="auth" onSubmit={submit}>
-        <h1>{isLogin ? 'Кіру' : 'Ұйымдастырушы болу'}</h1>
+        <h1>{isLogin ? t('Кіру') : t('Ұйымдастырушы болу')}</h1>
         <p className="auth__sub">
           {isLogin
-            ? 'Ойындарыңызды басқару үшін кіріңіз.'
-            : 'Аккаунт жасаңыз. Админ бекіткен соң өз ойындарыңызды қоса аласыз.'}
+            ? t('Ойындарыңызды басқару үшін кіріңіз.')
+            : t('Аккаунт жасаңыз. Админ бекіткен соң өз ойындарыңызды қоса аласыз.')}
         </p>
 
         {!isLogin && (
           <label className="field">
-            <span>Аты-жөні</span>
+            <span>{t('Аты-жөні')}</span>
             <input value={form.name} onChange={set('name')} required maxLength={100} />
           </label>
         )}
@@ -60,7 +64,7 @@ export default function Login() {
         </label>
 
         <label className="field">
-          <span>Құпия сөз</span>
+          <span>{t('Құпия сөз')}</span>
           <input
             type="password"
             value={form.password}
@@ -74,7 +78,7 @@ export default function Login() {
         {error && <p className="form-error">{error}</p>}
 
         <button className="btn btn--wide" disabled={busy}>
-          {busy ? 'Күте тұрыңыз…' : isLogin ? 'Кіру' : 'Тіркелу'}
+          {busy ? t('Күте тұрыңыз…') : isLogin ? t('Кіру') : t('Тіркелу')}
         </button>
 
         <button
@@ -85,7 +89,7 @@ export default function Login() {
             setError('');
           }}
         >
-          {isLogin ? 'Аккаунт жоқ па? Тіркелу' : 'Аккаунт бар ма? Кіру'}
+          {isLogin ? t('Аккаунт жоқ па? Тіркелу') : t('Аккаунт бар ма? Кіру')}
         </button>
       </form>
     </div>

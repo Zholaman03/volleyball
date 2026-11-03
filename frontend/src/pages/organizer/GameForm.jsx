@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { createGame, orgGame, updateGame } from '../../api';
 import { formatDuration } from '../../components/GameCard.jsx';
+import { useLang } from '../../i18n.jsx';
 import { DURATIONS, FORMAT_OPTIONS, TEAM_SIZE, computeDeadline, deadlineText, formatDate, todayStr } from '../../utils';
 
 // Төлем мерзімі: ойынға неше сағат қалғанға дейін
@@ -54,6 +55,7 @@ function toForm(g, playDate) {
 
 export default function GameForm() {
   const { id } = useParams();
+  const { t } = useLang();
   const [searchParams] = useSearchParams();
   const copyFrom = searchParams.get('from');
 
@@ -111,7 +113,7 @@ export default function GameForm() {
     }
   }
 
-  if (loading) return <p className="state">Жүктелуде…</p>;
+  if (loading) return <p className="state">{t('Жүктелуде…')}</p>;
 
   const teams = Number(form.teams_count);
   const total = repeat + 1;
@@ -121,22 +123,22 @@ export default function GameForm() {
   return (
     <>
       <div className="head">
-        <h1>{isEdit ? 'Ойынды өзгерту' : isCopy ? 'Ойынды көшіру' : 'Жаңа ойын'}</h1>
+        <h1>{isEdit ? t('Ойынды өзгерту') : isCopy ? t('Ойынды көшіру') : t('Жаңа ойын')}</h1>
       </div>
 
       {isCopy && !error && (
         <p className="hint hint--block">
-          Бұрынғы ойынның мәліметтері көшірілді, күні келесі аптаға ауыстырылды. Қажет болса өзгертіңіз.
+          {t('Бұрынғы ойынның мәліметтері көшірілді, күні келесі аптаға ауыстырылды. Қажет болса өзгертіңіз.')}
         </p>
       )}
 
       <form className="form" onSubmit={submit}>
         <label className="field">
-          <span>Формат</span>
+          <span>{t('Формат')}</span>
           <select value={form.format} onChange={set('format')}>
             {FORMAT_OPTIONS.map(([value, label]) => (
               <option key={value} value={value}>
-                {label}
+                {t(label)}
               </option>
             ))}
           </select>
@@ -144,23 +146,23 @@ export default function GameForm() {
 
         <div className="form__grid">
           <label className="field">
-            <span>Күні</span>
+            <span>{t('Күні')}</span>
             <input type="date" value={form.play_date} onChange={set('play_date')} required />
           </label>
           <label className="field">
-            <span>Басталу уақыты</span>
+            <span>{t('Басталу уақыты')}</span>
             <input type="time" value={form.start_time} onChange={set('start_time')} required />
           </label>
         </div>
 
         <label className="check">
           <input type="checkbox" checked={free} onChange={(e) => setFree(e.target.checked)} />
-          <span>Тегін ойын</span>
+          <span>{t('Тегін ойын')}</span>
         </label>
 
         <div className="form__grid">
           <label className="field">
-            <span>Ұзақтығы</span>
+            <span>{t('Ұзақтығы')}</span>
             <select value={form.duration_minutes} onChange={set('duration_minutes')}>
               {DURATIONS.map((m) => (
                 <option key={m} value={m}>
@@ -171,26 +173,26 @@ export default function GameForm() {
           </label>
           {!free && (
             <label className="field">
-              <span>Құны, ₸ (адам басына)</span>
+              <span>{t('Құны, ₸ (адам басына)')}</span>
               <input type="number" min="1" step="100" value={form.price} onChange={set('price')} required />
             </label>
           )}
         </div>
 
         <label className="field">
-          <span>Зал атауы</span>
+          <span>{t('Зал атауы')}</span>
           <input type="text" value={form.venue_name} onChange={set('venue_name')} required maxLength={120} />
         </label>
 
         <label className="field">
-          <span>Зал мекенжайы</span>
+          <span>{t('Зал мекенжайы')}</span>
           <input type="text" value={form.venue_address} onChange={set('venue_address')} required maxLength={255} />
         </label>
 
         {!free && (
           <>
             <label className="field">
-              <span>Төлем мәліметі (міндетті емес)</span>
+              <span>{t('Төлем мәліметі (міндетті емес)')}</span>
               <input
                 type="text"
                 value={form.payment_info}
@@ -198,30 +200,32 @@ export default function GameForm() {
                 placeholder="Kaspi: +7 701 123 45 67 (Ерлан А.)"
                 maxLength={255}
               />
-              <small className="hint">Ойыншы тіркелгеннен кейін осыны көреді. Ашық тізімде көрсетілмейді.</small>
+              <small className="hint">{t('Ойыншы тіркелгеннен кейін осыны көреді. Ашық тізімде көрсетілмейді.')}</small>
             </label>
 
             <label className="field">
-              <span>Төлем мерзімі (міндетті емес)</span>
+              <span>{t('Төлем мерзімі (міндетті емес)')}</span>
               <select value={form.payment_deadline_hours} onChange={set('payment_deadline_hours')}>
-                <option value="">Мерзімсіз</option>
+                <option value="">{t('Мерзімсіз')}</option>
                 {DEADLINE_OPTIONS.map((h) => (
                   <option key={h} value={h}>
-                    Ойынға {h} сағат қалғанға дейін
+                    {t('Ойынға {h} сағат қалғанға дейін', { h })}
                   </option>
                 ))}
               </select>
               <small className="hint">
                 {deadline
-                  ? `Төлеу керек: ${deadlineText(form.play_date, deadline)}-ге дейін. Орын өздігінен босамайды, мерзімі өткен төлемсіздер тек белгіленеді.`
-                  : 'Ойыншыға тіркелгеннен кейін көрсетіледі.'}
+                  ? t('Төлеу керек: {time}-ге дейін. Орын өздігінен босамайды, мерзімі өткен төлемсіздер тек белгіленеді.', {
+                      time: deadlineText(form.play_date, deadline),
+                    })
+                  : t('Ойыншыға тіркелгеннен кейін көрсетіледі.')}
               </small>
             </label>
           </>
         )}
 
         <label className="field">
-          <span>Командалар саны</span>
+          <span>{t('Командалар саны')}</span>
           <select value={form.teams_count} onChange={set('teams_count')}>
             {[1, 2, 3, 4, 5, 6].map((n) => (
               <option key={n} value={n}>
@@ -230,24 +234,27 @@ export default function GameForm() {
             ))}
           </select>
           <small className="hint">
-            Орын саны: {teams * TEAM_SIZE} ({teams} команда × {TEAM_SIZE})
+            {t('Орын саны: {total} ({teams} команда × {size})', { total: teams * TEAM_SIZE, teams, size: TEAM_SIZE })}
           </small>
         </label>
 
         {!isEdit && (
           <label className="field">
-            <span>Апта сайын қайталау</span>
+            <span>{t('Апта сайын қайталау')}</span>
             <select value={repeat} onChange={(e) => setRepeat(Number(e.target.value))}>
               {REPEAT_OPTIONS.map((n) => (
                 <option key={n} value={n}>
-                  {n === 0 ? 'Қайталамау' : `Тағы ${n} апта`}
+                  {n === 0 ? t('Қайталамау') : t('Тағы {n} апта', { n })}
                 </option>
               ))}
             </select>
             {repeat > 0 && form.play_date && (
               <small className="hint">
-                Барлығы {total} ойын қосылады: {formatDate(form.play_date)} → {formatDate(lastDate)}. Әрқайсысына
-                тіркелу бөлек жүреді.
+                {t('Барлығы {total} ойын қосылады: {from} → {to}. Әрқайсысына тіркелу бөлек жүреді.', {
+                  total,
+                  from: formatDate(form.play_date),
+                  to: formatDate(lastDate),
+                })}
               </small>
             )}
           </label>
@@ -260,10 +267,16 @@ export default function GameForm() {
             to={isEdit ? `/organizer/games/${id}` : isCopy ? `/organizer/games/${copyFrom}` : '/organizer'}
             className="btn btn--ghost btn--link"
           >
-            Бас тарту
+            {t('Бас тарту')}
           </Link>
           <button className="btn" disabled={busy}>
-            {busy ? 'Сақталуда…' : isEdit ? 'Сақтау' : total > 1 ? `${total} ойын қосу` : 'Ойын қосу'}
+            {busy
+              ? t('Сақталуда…')
+              : isEdit
+                ? t('Сақтау')
+                : total > 1
+                  ? t('{n} ойын қосу', { n: total })
+                  : t('Ойын қосу')}
           </button>
         </div>
       </form>

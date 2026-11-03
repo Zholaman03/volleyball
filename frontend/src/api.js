@@ -1,3 +1,5 @@
+import { getLang, tr } from './i18n.jsx';
+
 const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api';
 const TOKEN_KEY = 'vb_token';
 
@@ -24,7 +26,7 @@ export function setOnUnauthorized(fn) {
 }
 
 async function request(path, { method = 'GET', body } = {}) {
-  const headers = { Accept: 'application/json' };
+  const headers = { Accept: 'application/json', 'Accept-Language': getLang() };
   if (body !== undefined) headers['Content-Type'] = 'application/json';
 
   const token = getToken();
@@ -38,7 +40,7 @@ async function request(path, { method = 'GET', body } = {}) {
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
   } catch {
-    throw new Error('Серверге қосыла алмадық. Интернетті тексеріңіз.');
+    throw new Error(tr('Серверге қосыла алмадық. Интернетті тексеріңіз.'));
   }
 
   const data = await res.json().catch(() => ({}));
@@ -46,7 +48,7 @@ async function request(path, { method = 'GET', body } = {}) {
   if (!res.ok) {
     if (res.status === 401 && token) onUnauthorized(); // токен ескірген — шығарып жібереміз
     const firstFieldError = data.errors ? Object.values(data.errors)[0]?.[0] : null;
-    const error = new Error(firstFieldError || data.message || 'Қате орын алды. Қайта көріңіз.');
+    const error = new Error(firstFieldError || data.message || tr('Қате орын алды. Қайта көріңіз.'));
     error.status = res.status;
     throw error;
   }

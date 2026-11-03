@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { cancelMyRegistration, fetchMyRegistration } from '../api';
+import LangSwitch from '../components/LangSwitch.jsx';
+import { useLang } from '../i18n.jsx';
 import { deadlineText, formatDate } from '../utils';
 
 const STATUS_TEXT = {
@@ -12,6 +14,7 @@ const STATUS_TEXT = {
 /** /cancel/<token>: ойыншы өз тіркеуін көреді және аккаунтсыз бас тарта алады */
 export default function CancelPage() {
   const { token } = useParams();
+  const { t, tx } = useLang();
   const [reg, setReg] = useState(null);
   const [state, setState] = useState('loading'); // loading | ready | notfound | error
   const [busy, setBusy] = useState(false);
@@ -28,7 +31,7 @@ export default function CancelPage() {
   }, [token]);
 
   async function cancel() {
-    if (!window.confirm('Тіркеуден бас тартасыз ба?')) return;
+    if (!window.confirm(t('Тіркеуден бас тартасыз ба?'))) return;
     setBusy(true);
     setError('');
     try {
@@ -48,19 +51,22 @@ export default function CancelPage() {
     <div className="page">
       <div className="toprow toprow--left">
         <Link to="/" className="toprow__link">
-          ← Барлық ойындар
+          {t('← Барлық ойындар')}
         </Link>
+        <LangSwitch />
       </div>
 
       <header className="hero">
-        <span className="hero__eyebrow">Менің тіркеуім</span>
-        <h1>Бас тарту</h1>
+        <span className="hero__eyebrow">{t('Менің тіркеуім')}</span>
+        <h1>{t('Бас тарту')}</h1>
       </header>
 
       <main className="list">
-        {state === 'loading' && <p className="state">Жүктелуде…</p>}
-        {state === 'notfound' && <p className="state">Сілтеме дұрыс емес немесе тіркеу табылмады.</p>}
-        {state === 'error' && <p className="state state--error">Серверге қосыла алмадық. Кейінірек қайта көріңіз.</p>}
+        {state === 'loading' && <p className="state">{t('Жүктелуде…')}</p>}
+        {state === 'notfound' && <p className="state">{t('Сілтеме дұрыс емес немесе тіркеу табылмады.')}</p>}
+        {state === 'error' && (
+          <p className="state state--error">{t('Серверге қосыла алмадық. Кейінірек қайта көріңіз.')}</p>
+        )}
 
         {state === 'ready' && (
           <article className="card">
@@ -82,7 +88,7 @@ export default function CancelPage() {
             </div>
 
             <p className="hint hint--block">
-              {STATUS_TEXT[reg.status]}
+              {t(STATUS_TEXT[reg.status])}
               {reg.status === 'waitlist' && reg.waitlist_position ? ` (№${reg.waitlist_position})` : ''}.
             </p>
 
@@ -92,23 +98,29 @@ export default function CancelPage() {
             {reg.can_cancel && (
               <>
                 <button className="btn btn--wide" onClick={cancel} disabled={busy}>
-                  {busy ? 'Күтіңіз…' : 'Тіркеуден бас тарту'}
+                  {busy ? t('Күтіңіз…') : t('Тіркеуден бас тарту')}
                 </button>
                 {reg.status === 'active' && (
-                  <p className="hint">Бас тартуға болады: {deadlineText(game.play_date, reg.cancel_deadline)}-ге дейін.</p>
+                  <p className="hint">
+                    {t('Бас тартуға болады: {time}-ге дейін.', { time: deadlineText(game.play_date, reg.cancel_deadline) })}
+                  </p>
                 )}
               </>
             )}
 
             {!reg.can_cancel && reg.status !== 'cancelled' && (
               <p className="hint hint--block">
-                Бас тарту мерзімі өтті. Ұйымдастырушыға (<b>{game.organizer_name}</b>) WhatsApp-та жазыңыз.
+                {tx('Бас тарту мерзімі өтті. Ұйымдастырушыға ({name}) WhatsApp-та жазыңыз.', {
+                  name: <b>{game.organizer_name}</b>,
+                })}
               </p>
             )}
 
             {reg.status === 'cancelled' && reg.paid && (
               <p className="hint hint--block">
-                Төлем жасаған болсаңыз, ұйымдастырушы <b>{game.organizer_name}</b> сізбен хабарласады.
+                {tx('Төлем жасаған болсаңыз, ұйымдастырушы {name} сізбен хабарласады.', {
+                  name: <b>{game.organizer_name}</b>,
+                })}
               </p>
             )}
           </article>

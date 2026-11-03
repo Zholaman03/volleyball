@@ -1,3 +1,4 @@
+import { dateLocale } from './i18n.jsx';
 import { normalizePhone } from './phone';
 
 export const FORMAT_OPTIONS = [
@@ -19,7 +20,7 @@ export function todayStr() {
 
 export function formatDate(iso) {
   const d = new Date(`${iso}T00:00:00`);
-  return d.toLocaleDateString('kk-KZ', { day: 'numeric', month: 'long', weekday: 'short' });
+  return d.toLocaleDateString(dateLocale(), { day: 'numeric', month: 'long', weekday: 'short' });
 }
 
 /* ---- WhatsApp нөмірі ---- */

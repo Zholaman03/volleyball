@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { registerToGame } from '../api';
 import { normalizePhone } from '../phone';
+import { useLang } from '../i18n.jsx';
 import { copyText } from '../share';
 import { PHONE_PREFIX, deadlineText, formatPhoneInput } from '../utils';
 import { formatPrice } from './GameCard.jsx';
 
-const PHONE_ERROR = 'WhatsApp нөмірін дұрыс енгізіңіз, мысалы: +7 701 123 45 67.';
+const PHONE_ERROR = 'WhatsApp нөмірін дұрыс енгізіңіз, мысалы: +7 701 123 45 67.'; // t() арқылы көрсетіледі
 
 // Бұл жыныс форматқа мүлде кірмейді (мысалы, қыздар форматында ұлдар): таңдауға болмайды
 export function isGenderBlocked(game, gender) {
@@ -20,6 +21,7 @@ export function isGenderFull(game, gender) {
 }
 
 export default function RegisterModal({ game, onClose, onDone }) {
+  const { t, tx } = useLang();
   const genders = ['male', 'female'];
   const defaultGender =
     genders.find((g) => !isGenderBlocked(game, g) && !isGenderFull(game, g)) ??
@@ -59,7 +61,7 @@ export default function RegisterModal({ game, onClose, onDone }) {
   // Өрістен шыққанда қате болса дереу көрсетеміз (әлі ештеңе жазылмаған болса — үндемейміз)
   function onPhoneBlur() {
     const typed = form.phone.trim() !== PHONE_PREFIX.trim();
-    if (typed && normalizePhone(form.phone) === null) setPhoneError(PHONE_ERROR);
+    if (typed && normalizePhone(form.phone) === null) setPhoneError(t(PHONE_ERROR));
   }
 
   async function submit(e) {
@@ -67,7 +69,7 @@ export default function RegisterModal({ game, onClose, onDone }) {
 
     const phone = normalizePhone(form.phone);
     if (phone === null) {
-      setPhoneError(PHONE_ERROR);
+      setPhoneError(t(PHONE_ERROR));
       return;
     }
 
@@ -89,58 +91,69 @@ export default function RegisterModal({ game, onClose, onDone }) {
   return (
     <div className="overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
-        <button className="modal__close" onClick={onClose} aria-label="Жабу">
+        <button className="modal__close" onClick={onClose} aria-label={t('Жабу')}>
           ×
         </button>
 
         {success ? (
           <div className="success">
             <div className="success__icon">✓</div>
-            <h2>{onWaitlist ? 'Күту тізіміндесіз' : 'Тіркелдіңіз!'}</h2>
+            <h2>{onWaitlist ? t('Күту тізіміндесіз') : t('Тіркелдіңіз!')}</h2>
             <p>
               {game.start_time}–{game.end_time}, {game.venue_name}.
-              {!onWaitlist && ` ${game.is_free ? 'Ойын тегін.' : `Төлем: ${formatPrice(game.price)}.`}`}
+              {!onWaitlist &&
+                ` ${game.is_free ? t('Ойын тегін.') : t('Төлем: {price}.', { price: formatPrice(game.price) })}`}
             </p>
 
             {onWaitlist ? (
               <p>
-                Сіздің орныңыз: <b>№{result.waitlist_position}</b>. Орын босаса, ұйымдастырушы{' '}
-                <b>{game.organizer_name}</b> сізбен WhatsApp арқылы байланысады.
+                {tx('Сіздің орныңыз: {pos}. Орын босаса, ұйымдастырушы {name} сізбен WhatsApp арқылы байланысады.', {
+                  pos: <b>№{result.waitlist_position}</b>,
+                  name: <b>{game.organizer_name}</b>,
+                })}
               </p>
             ) : game.is_free ? (
               <p>
-                Ұйымдастырушы <b>{game.organizer_name}</b> қажет болса сізбен WhatsApp арқылы байланысады.
+                {tx('Ұйымдастырушы {name} қажет болса сізбен WhatsApp арқылы байланысады.', {
+                  name: <b>{game.organizer_name}</b>,
+                })}
               </p>
             ) : (
               <>
                 {payment && (
                   <div className="pay">
-                    <span>Төлем мәліметі</span>
+                    <span>{t('Төлем мәліметі')}</span>
                     <strong>{payment}</strong>
                     <button type="button" className="btn btn--ghost" onClick={() => copy('pay', payment)}>
-                      {copied === 'pay' ? 'Көшірілді ✓' : 'Көшіру'}
+                      {copied === 'pay' ? t('Көшірілді ✓') : t('Көшіру')}
                     </button>
                   </div>
                 )}
                 {deadline && (
                   <p>
-                    Төлемді <b>{deadlineText(game.play_date, deadline)}</b>-ге дейін жасаңыз.
+                    {tx('Төлемді {time}-ге дейін жасаңыз.', {
+                      time: <b>{deadlineText(game.play_date, deadline)}</b>,
+                    })}
                   </p>
                 )}
                 {payment ? (
                   <p>
-                    Төлегеннен кейін чекті ұйымдастырушыға (<b>{game.organizer_name}</b>) WhatsApp арқылы жіберіңіз.
+                    {tx('Төлегеннен кейін чекті ұйымдастырушыға ({name}) WhatsApp арқылы жіберіңіз.', {
+                      name: <b>{game.organizer_name}</b>,
+                    })}
                   </p>
                 ) : (
                   <p>
-                    Ұйымдастырушы <b>{game.organizer_name}</b> төлем туралы сізбен WhatsApp арқылы байланысады.
+                    {tx('Ұйымдастырушы {name} төлем туралы сізбен WhatsApp арқылы байланысады.', {
+                      name: <b>{game.organizer_name}</b>,
+                    })}
                   </p>
                 )}
               </>
             )}
 
             <div className="pay">
-              <span>Бас тарту сілтемесі</span>
+              <span>{t('Бас тарту сілтемесі')}</span>
               <Link to={cancelPath} className="link" onClick={onClose}>
                 {window.location.origin}
                 {cancelPath}
@@ -150,39 +163,39 @@ export default function RegisterModal({ game, onClose, onDone }) {
                 className="btn btn--ghost"
                 onClick={() => copy('link', `${window.location.origin}${cancelPath}`)}
               >
-                {copied === 'link' ? 'Көшірілді ✓' : 'Сілтемені көшіру'}
+                {copied === 'link' ? t('Көшірілді ✓') : t('Сілтемені көшіру')}
               </button>
             </div>
             <p className="hint">
-              Келе алмасаңыз, осы сілтеме арқылы бас тартыңыз. Сақтап қойыңыз, қайта көрсетілмейді.
+              {t('Келе алмасаңыз, осы сілтеме арқылы бас тартыңыз. Сақтап қойыңыз, қайта көрсетілмейді.')}
               {!onWaitlist &&
-                ` Бас тартуға болады: ${deadlineText(game.play_date, result.cancel_deadline)}-ге дейін.`}
+                ` ${t('Бас тартуға болады: {time}-ге дейін.', { time: deadlineText(game.play_date, result.cancel_deadline) })}`}
             </p>
 
             <button className="btn" onClick={onClose}>
-              Жақсы
+              {t('Жақсы')}
             </button>
           </div>
         ) : (
           <form onSubmit={submit}>
-            <h2>{waitlistMode ? 'Күту тізіміне жазылу' : 'Ойынға тіркелу'}</h2>
+            <h2>{waitlistMode ? t('Күту тізіміне жазылу') : t('Ойынға тіркелу')}</h2>
             <p className="modal__sub">
               {game.format_label} · {game.start_time}–{game.end_time} · {game.venue_name}
             </p>
 
             {waitlistMode && (
               <p className="hint hint--block">
-                Орын қалмады. Күту тізіміне жазылсаңыз, орын босағанда ұйымдастырушы сізбен WhatsApp-та байланысады.
+                {t('Орын қалмады. Күту тізіміне жазылсаңыз, орын босағанда ұйымдастырушы сізбен WhatsApp-та байланысады.')}
               </p>
             )}
 
             <label className="field">
-              <span>Аты-жөні</span>
-              <input value={form.name} onChange={set('name')} placeholder="Мысалы, Айдос" required maxLength={100} />
+              <span>{t('Аты-жөні')}</span>
+              <input value={form.name} onChange={set('name')} placeholder={t('Мысалы, Айдос')} required maxLength={100} />
             </label>
 
             <label className={`field ${phoneError ? 'field--error' : ''}`}>
-              <span>WhatsApp нөмірі</span>
+              <span>{t('WhatsApp нөмірі')}</span>
               <input
                 type="tel"
                 value={form.phone}
@@ -197,16 +210,16 @@ export default function RegisterModal({ game, onClose, onDone }) {
               {phoneError ? (
                 <small className="field__error">{phoneError}</small>
               ) : (
-                <small className="hint">Ұйымдастырушы сізбен осы нөмір арқылы WhatsApp-та байланысады</small>
+                <small className="hint">{t('Ұйымдастырушы сізбен осы нөмір арқылы WhatsApp-та байланысады')}</small>
               )}
             </label>
 
             <fieldset className="field">
-              <span>Жынысы</span>
+              <span>{t('Жынысы')}</span>
               <div className="seg">
                 {[
-                  ['male', 'Ұл'],
-                  ['female', 'Қыз'],
+                  ['male', t('Ұл')],
+                  ['female', t('Қыз')],
                 ].map(([value, label]) => {
                   const blocked = isGenderBlocked(game, value);
                   const full = isGenderFull(game, value);
@@ -220,7 +233,7 @@ export default function RegisterModal({ game, onClose, onDone }) {
                         disabled={blocked}
                         onChange={set('gender')}
                       />
-                      <span>{blocked ? `${label} (толды)` : full ? `${label} (күту тізімі)` : label}</span>
+                      <span>{blocked ? `${label} (${t('толды')})` : full ? `${label} (${t('күту тізімі')})` : label}</span>
                     </label>
                   );
                 })}
@@ -231,12 +244,12 @@ export default function RegisterModal({ game, onClose, onDone }) {
 
             <button className="btn btn--wide" disabled={submitting || !form.gender}>
               {submitting
-                ? 'Жіберілуде…'
+                ? t('Жіберілуде…')
                 : waitlistMode
-                  ? 'Күту тізіміне жазылу'
+                  ? t('Күту тізіміне жазылу')
                   : game.is_free
-                    ? 'Тіркелу'
-                    : `Тіркелу · ${formatPrice(game.price)}`}
+                    ? t('Тіркелу')
+                    : `${t('Тіркелу')} · ${formatPrice(game.price)}`}
             </button>
           </form>
         )}

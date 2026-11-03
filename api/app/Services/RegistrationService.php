@@ -32,17 +32,17 @@ class RegistrationService
             $game = Game::whereKey($game->id)->lockForUpdate()->firstOrFail();
 
             if ($game->play_date->lt(today())) {
-                return $this->fail(422, 'Бұл ойын өтіп кеткен.');
+                return $this->fail(422, __('Бұл ойын өтіп кеткен.'));
             }
 
             // Бір нөмір бір ойында бір ғана жол (unique). Бас тартқан адам қайта тіркелсе, сол жол жаңарады
             $existing = $game->allRegistrations()->where('phone', $data['phone'])->first();
 
             if ($existing?->status === Registration::ACTIVE) {
-                return $this->fail(409, 'Бұл нөмір осы ойынға тіркелген.');
+                return $this->fail(409, __('Бұл нөмір осы ойынға тіркелген.'));
             }
             if ($existing?->status === Registration::WAITLIST) {
-                return $this->fail(409, 'Бұл нөмір күту тізімінде тұр.');
+                return $this->fail(409, __('Бұл нөмір күту тізімінде тұр.'));
             }
 
             $blocked = $this->noSpotReason($game, $data['gender']);
@@ -70,7 +70,7 @@ class RegistrationService
             return [
                 'ok'               => true,
                 'status'           => 201,
-                'message'          => $blocked === null ? 'Сәтті тіркелдіңіз!' : 'Күту тізіміне жазылдыңыз.',
+                'message'          => $blocked === null ? __('Сәтті тіркелдіңіз!') : __('Күту тізіміне жазылдыңыз.'),
                 'registration'     => $registration,
                 'registered_count' => $total,
                 'capacity'         => $game->capacity,
@@ -90,16 +90,16 @@ class RegistrationService
             $registration = Registration::whereKey($registration->id)->firstOrFail();
 
             if ($registration->status === Registration::CANCELLED) {
-                return $this->fail(409, 'Тіркеу бұрын бас тартылған.');
+                return $this->fail(409, __('Тіркеу бұрын бас тартылған.'));
             }
 
             if ($registration->status === Registration::ACTIVE && ! $game->canCancel()) {
                 $hours = Game::CANCEL_HOURS_BEFORE;
-                return $this->fail(422, "Бас тарту мерзімі өтті: ойынға {$hours} сағаттан аз қалды. Ұйымдастырушыға ({$game->organizer_name}) WhatsApp-та жазыңыз.");
+                return $this->fail(422, __('Бас тарту мерзімі өтті: ойынға :hours сағаттан аз қалды. Ұйымдастырушыға (:organizer) WhatsApp-та жазыңыз.', ['hours' => $hours, 'organizer' => $game->organizer_name]));
             }
 
             if ($game->startsAt()->isPast()) {
-                return $this->fail(422, 'Ойын басталып кеткен.');
+                return $this->fail(422, __('Ойын басталып кеткен.'));
             }
 
             $registration->update([
@@ -111,8 +111,8 @@ class RegistrationService
                 'ok'           => true,
                 'status'       => 200,
                 'message'      => $registration->paid
-                    ? 'Тіркеуіңіз бас тартылды. Төлем жасаған болсаңыз, ұйымдастырушы сізбен хабарласады.'
-                    : 'Тіркеуіңіз бас тартылды.',
+                    ? __('Тіркеуіңіз бас тартылды. Төлем жасаған болсаңыз, ұйымдастырушы сізбен хабарласады.')
+                    : __('Тіркеуіңіз бас тартылды.'),
                 'registration' => $registration,
             ];
         });
@@ -126,7 +126,7 @@ class RegistrationService
             $registration = Registration::whereKey($registration->id)->firstOrFail();
 
             if ($registration->status !== Registration::WAITLIST) {
-                return $this->fail(409, 'Бұл адам күту тізімінде емес.');
+                return $this->fail(409, __('Бұл адам күту тізімінде емес.'));
             }
 
             $blocked = $this->noSpotReason($game, $registration->gender);
@@ -136,7 +136,7 @@ class RegistrationService
 
             $registration->update(['status' => Registration::ACTIVE]);
 
-            return ['ok' => true, 'status' => 200, 'message' => 'Ойынға қосылды.', 'registration' => $registration];
+            return ['ok' => true, 'status' => 200, 'message' => __('Ойынға қосылды.'), 'registration' => $registration];
         });
     }
 
@@ -157,13 +157,13 @@ class RegistrationService
     private function noSpotReason(Game $game, string $gender): ?string
     {
         if ($game->registrations()->count() >= $game->capacity) {
-            return 'Орын қалмады.';
+            return __('Орын қалмады.');
         }
 
         $limit = $game->genderLimits()[$gender];
         if ($limit !== null && $game->registrations()->where('gender', $gender)->count() >= $limit) {
-            $who = $gender === 'male' ? 'ұлдарға' : 'қыздарға';
-            return "Бұл форматта {$who} арналған орын қалмады.";
+            $who = $gender === 'male' ? __('ұлдарға') : __('қыздарға');
+            return __('Бұл форматта :who арналған орын қалмады.', ['who' => $who]);
         }
 
         return null;

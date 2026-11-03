@@ -34,7 +34,7 @@ class AdminUserController extends Controller
     public function revoke(User $user): JsonResponse
     {
         if ($user->is_admin) {
-            return response()->json(['message' => 'Админнің бекітуін алып тастауға болмайды.'], 422);
+            return response()->json(['message' => __('Админнің бекітуін алып тастауға болмайды.')], 422);
         }
 
         $user->forceFill(['approved_at' => null])->save();

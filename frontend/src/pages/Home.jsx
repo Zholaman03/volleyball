@@ -2,7 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchGames } from '../api';
 import GameCard from '../components/GameCard.jsx';
+import LangSwitch from '../components/LangSwitch.jsx';
 import RegisterModal from '../components/RegisterModal.jsx';
+import { dateLocale, useLang } from '../i18n.jsx';
 import { todayStr } from '../utils';
 
 const FILTERS = [
@@ -22,7 +24,7 @@ function addDays(iso, n) {
   return d.toLocaleDateString('sv-SE'); // YYYY-MM-DD
 }
 
-function buildDays(today) {
+function buildDays(today, t) {
   return Array.from({ length: DAYS_AHEAD }, (_, i) => {
     const iso = addDays(today, i);
     const d = new Date(`${iso}T00:00:00`);
@@ -30,19 +32,21 @@ function buildDays(today) {
       iso,
       top:
         i === 0
-          ? 'Бүгін'
+          ? t('Бүгін')
           : i === 1
-            ? 'Ертең'
-            : d.toLocaleDateString('kk-KZ', { weekday: 'short' }),
+            ? t('Ертең')
+            : d.toLocaleDateString(dateLocale(), { weekday: 'short' }),
       day: d.getDate(),
-      long: d.toLocaleDateString('kk-KZ', { day: 'numeric', month: 'long', weekday: 'long' }),
+      long: d.toLocaleDateString(dateLocale(), { day: 'numeric', month: 'long', weekday: 'long' }),
     };
   });
 }
 
 export default function Home() {
+  const { t, lang } = useLang();
   const today = useMemo(() => todayStr(), []);
-  const days = useMemo(() => buildDays(today), [today]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const days = useMemo(() => buildDays(today, t), [today, lang]);
 
   const [date, setDate] = useState(today);
   const [games, setGames] = useState([]);
@@ -89,23 +93,24 @@ export default function Home() {
 
   const visible = filter === 'all' ? games : games.filter((g) => g.format === filter);
   const current = days.find((d) => d.iso === date) ?? days[0];
-  const eyebrow = date === today ? `Бүгін · ${current.long}` : current.long;
+  const eyebrow = date === today ? `${t('Бүгін')} · ${current.long}` : current.long;
 
   return (
     <div className="page">
       <div className="toprow">
         <Link to="/organizer" className="toprow__link">
-          Ұйымдастырушы кабинеті
+          {t('Ұйымдастырушы кабинеті')}
         </Link>
+        <LangSwitch />
       </div>
 
       <header className="hero">
         <span className="hero__eyebrow">{eyebrow}</span>
-        <h1>Волейбол ойындары</h1>
-        <p>Өзіңе ыңғайлы ойынды таңда да, бір минутта тіркел.</p>
+        <h1>{t('Волейбол ойындары')}</h1>
+        <p>{t('Өзіңе ыңғайлы ойынды таңда да, бір минутта тіркел.')}</p>
       </header>
 
-      <nav className="days" aria-label="Күнді таңдау">
+      <nav className="days" aria-label={t('Күнді таңдау')}>
         {days.map((d) => (
           <button
             key={d.iso}
@@ -119,35 +124,35 @@ export default function Home() {
         ))}
       </nav>
 
-      <nav className="filters" aria-label="Ойын форматы">
+      <nav className="filters" aria-label={t('Ойын форматы')}>
         {FILTERS.map((f) => (
           <button
             key={f.key}
             className={`chip ${filter === f.key ? 'chip--active' : ''}`}
             onClick={() => setFilter(f.key)}
           >
-            {f.label}
+            {t(f.label)}
           </button>
         ))}
       </nav>
 
       <main className="list">
-        {status === 'loading' && <p className="state">Жүктелуде…</p>}
+        {status === 'loading' && <p className="state">{t('Жүктелуде…')}</p>}
         {status === 'error' && (
           <p className="state state--error">
-            Серверге қосыла алмадық.{' '}
+            {t('Серверге қосыла алмадық.')}{' '}
             <button className="link" onClick={() => load()}>
-              Қайта көру
+              {t('Қайта көру')}
             </button>
           </p>
         )}
         {status === 'ready' && games.length === 0 && (
           <p className="state">
-            {date === today ? 'Бүгін ойын жоқ.' : 'Бұл күні ойын жоқ.'} Басқа күнді таңдап көріңіз.
+            {date === today ? t('Бүгін ойын жоқ.') : t('Бұл күні ойын жоқ.')} {t('Басқа күнді таңдап көріңіз.')}
           </p>
         )}
         {status === 'ready' && games.length > 0 && visible.length === 0 && (
-          <p className="state">Бұл формат бойынша ойын жоқ.</p>
+          <p className="state">{t('Бұл формат бойынша ойын жоқ.')}</p>
         )}
         {status === 'ready' &&
           visible.map((game) => (

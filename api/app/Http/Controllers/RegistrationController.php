@@ -58,7 +58,7 @@ class RegistrationController extends Controller
             'cancel_deadline'   => $game->cancelDeadlineString(),
             'game'              => [
                 'id'             => $game->id,
-                'format_label'   => \App\Models\Game::FORMATS[$game->format] ?? $game->format,
+                'format_label'   => \App\Models\Game::formatLabel($game->format),
                 'play_date'      => $game->play_date->toDateString(),
                 'start_time'     => substr($game->start_time, 0, 5),
                 'end_time'       => $game->endTime(),

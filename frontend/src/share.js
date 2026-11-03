@@ -1,3 +1,4 @@
+import { tr } from './i18n.jsx';
 import { deadlineText, formatDate } from './utils';
 
 const money = (price) => `${price.toLocaleString('ru-RU')} ₸`;
@@ -10,15 +11,15 @@ export function gameUrl(id) {
 /** Хабарламаның мәтіні (сілтемесіз) */
 export function shareText(game) {
   return [
-    `Волейбол · ${formatDate(game.play_date)}, ${game.start_time}–${game.end_time}`,
+    tr('Волейбол · {date}, {start}–{end}', { date: formatDate(game.play_date), start: game.start_time, end: game.end_time }),
     `${game.venue_name}, ${game.venue_address}`,
-    `${game.format_label} · ${game.is_free ? 'Тегін' : `${money(game.price)} адам басына`}`,
+    `${game.format_label} · ${game.is_free ? tr('Тегін') : tr('{price} адам басына', { price: money(game.price) })}`,
   ].join('\n');
 }
 
 /** WhatsApp-та (топқа не адамға) жіберуге арналған дайын сілтеме */
 export function whatsappShareUrl(game) {
-  const text = `${shareText(game)}\nТіркелу: ${gameUrl(game.id)}`;
+  const text = `${shareText(game)}\n${tr('Тіркелу:')} ${gameUrl(game.id)}`;
   return `https://wa.me/?text=${encodeURIComponent(text)}`;
 }
 
@@ -28,14 +29,20 @@ export function whatsappShareUrl(game) {
  */
 export function paymentMessage(game, registration) {
   const lines = [
-    `Сәлем, ${registration.name}! Сіз ${formatDate(game.play_date)}, ${game.start_time}–${game.end_time} (${game.venue_name}) волейбол ойынына тіркелдіңіз.`,
-    `Төлем: ${money(game.price)}.`,
+    tr('Сәлем, {name}! Сіз {date}, {start}–{end} ({venue}) волейбол ойынына тіркелдіңіз.', {
+      name: registration.name,
+      date: formatDate(game.play_date),
+      start: game.start_time,
+      end: game.end_time,
+      venue: game.venue_name,
+    }),
+    tr('Төлем: {price}.', { price: money(game.price) }),
   ];
   if (game.payment_info) lines.push(game.payment_info);
   if (game.payment_deadline) {
-    lines.push(`Төлемді ${deadlineText(game.play_date, game.payment_deadline)}-ге дейін жасаңыз.`);
+    lines.push(tr('Төлемді {time}-ге дейін жасаңыз.', { time: deadlineText(game.play_date, game.payment_deadline) }));
   }
-  lines.push('Төлегеннен кейін чекті осы чатқа жіберіңіз. Рақмет!');
+  lines.push(tr('Төлегеннен кейін чекті осы чатқа жіберіңіз. Рақмет!'));
   return lines.join('\n');
 }
 

@@ -18,12 +18,12 @@ class AuthController extends Controller
             'email'    => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'max:100'],
         ], [
-            'name.required'     => 'Атыңызды жазыңыз.',
-            'email.required'    => 'Email жазыңыз.',
-            'email.email'       => 'Email дұрыс емес.',
-            'email.unique'      => 'Бұл email тіркелген.',
-            'password.required' => 'Құпия сөзді жазыңыз.',
-            'password.min'      => 'Құпия сөз кемінде 8 таңбадан тұруы керек.',
+            'name.required'     => __('Атыңызды жазыңыз.'),
+            'email.required'    => __('Email жазыңыз.'),
+            'email.email'       => __('Email дұрыс емес.'),
+            'email.unique'      => __('Бұл email тіркелген.'),
+            'password.required' => __('Құпия сөзді жазыңыз.'),
+            'password.min'      => __('Құпия сөз кемінде 8 таңбадан тұруы керек.'),
         ]);
 
         $user = User::create($data); // password 'hashed' cast арқылы хэштеледі
@@ -38,16 +38,16 @@ class AuthController extends Controller
             'email'    => ['required', 'email'],
             'password' => ['required', 'string'],
         ], [
-            'email.required'    => 'Email жазыңыз.',
-            'email.email'       => 'Email дұрыс емес.',
-            'password.required' => 'Құпия сөзді жазыңыз.',
+            'email.required'    => __('Email жазыңыз.'),
+            'email.email'       => __('Email дұрыс емес.'),
+            'password.required' => __('Құпия сөзді жазыңыз.'),
         ]);
 
         $user = User::where('email', $data['email'])->first();
 
         if (! $user || ! Hash::check($data['password'], $user->password)) {
             throw ValidationException::withMessages([
-                'email' => ['Email немесе құпия сөз қате.'],
+                'email' => [__('Email немесе құпия сөз қате.')],
             ]);
         }
 

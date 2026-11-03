@@ -13,7 +13,7 @@ class EnsureApproved
     {
         if (! $request->user()?->isApproved()) {
             return response()->json([
-                'message' => 'Аккаунтыңыз әлі бекітілмеген. Админ бекіткен соң ойын қоса аласыз.',
+                'message' => __('Аккаунтыңыз әлі бекітілмеген. Админ бекіткен соң ойын қоса аласыз.'),
                 'code'    => 'pending_approval',
             ], 403);
         }

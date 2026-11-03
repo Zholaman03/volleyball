@@ -9,6 +9,7 @@ import {
   setPaid,
 } from '../../api';
 import { formatDuration, formatPrice } from '../../components/GameCard.jsx';
+import { useLang } from '../../i18n.jsx';
 import SharePanel from '../../components/SharePanel.jsx';
 import { paymentMessage } from '../../share';
 import { normalizePhone } from '../../phone';
@@ -21,7 +22,7 @@ import {
   whatsappLink,
 } from '../../utils';
 
-const GENDER = { male: 'Ұл', female: 'Қыз' };
+const GENDER = { male: 'Ұл', female: 'Қыз' }; // t(GENDER[…]) түрінде көрсетіледі
 
 function genderFull(game, gender) {
   const slot = game[gender];
@@ -29,6 +30,7 @@ function genderFull(game, gender) {
 }
 
 function AddParticipant({ game, onAdded }) {
+  const { t } = useLang();
   const firstFree = ['male', 'female'].find((g) => !genderFull(game, g)) ?? '';
   const [form, setForm] = useState({ name: '', phone: PHONE_PREFIX, gender: firstFree });
   const [busy, setBusy] = useState(false);
@@ -40,7 +42,7 @@ function AddParticipant({ game, onAdded }) {
   async function submit(e) {
     e.preventDefault();
     if (!isValidWhatsApp(form.phone)) {
-      setError('WhatsApp нөмірін дұрыс енгізіңіз, мысалы: +7 701 123 45 67.');
+      setError(t('WhatsApp нөмірін дұрыс енгізіңіз, мысалы: +7 701 123 45 67.'));
       return;
     }
     setBusy(true);
@@ -56,22 +58,22 @@ function AddParticipant({ game, onAdded }) {
     }
   }
 
-  if (game.is_full) return <p className="hint">Барлық орын толды.</p>;
+  if (game.is_full) return <p className="hint">{t('Барлық орын толды.')}</p>;
 
   return (
     <form className="add" onSubmit={submit}>
-      <input placeholder="Аты" value={form.name} onChange={set('name')} required maxLength={100} />
-      <input placeholder="WhatsApp +7 701 123 45 67" inputMode="tel" value={form.phone} onChange={setPhone} required />
+      <input placeholder={t('Аты')} value={form.name} onChange={set('name')} required maxLength={100} />
+      <input placeholder={t('WhatsApp +7 701 123 45 67')} inputMode="tel" value={form.phone} onChange={setPhone} required />
       <select value={form.gender} onChange={set('gender')} required>
         {['male', 'female'].map((g) => (
           <option key={g} value={g} disabled={genderFull(game, g)}>
-            {GENDER[g]}
-            {genderFull(game, g) ? ' (толды)' : ''}
+            {t(GENDER[g])}
+            {genderFull(game, g) ? ` (${t('толды')})` : ''}
           </option>
         ))}
       </select>
       <button className="btn" disabled={busy || !form.gender}>
-        Қосу
+        {t('Қосу')}
       </button>
       {error && <p className="form-error add__error">{error}</p>}
     </form>
@@ -80,6 +82,7 @@ function AddParticipant({ game, onAdded }) {
 
 export default function GameDetail() {
   const { id } = useParams();
+  const { t } = useLang();
   const navigate = useNavigate();
 
   const [game, setGame] = useState(null);
@@ -109,8 +112,8 @@ export default function GameDetail() {
 
   async function removeGame() {
     const warn = game.registered_count
-      ? `Ойында ${game.registered_count} адам тіркелген. Ойынды өшіргенде тізім де өшеді. Жалғастырасыз ба?`
-      : 'Ойынды өшіресіз бе?';
+      ? t('Ойында {n} адам тіркелген. Ойынды өшіргенде тізім де өшеді. Жалғастырасыз ба?', { n: game.registered_count })
+      : t('Ойынды өшіресіз бе?');
     if (!window.confirm(warn)) return;
     try {
       await deleteGame(id);
@@ -123,10 +126,12 @@ export default function GameDetail() {
   if (!game) {
     return error ? (
       <p className="state state--error">
-        {error} <Link to="/organizer" className="link">Кабинетке оралу</Link>
+        {error} <Link to="/organizer" className="link">
+          {t('Кабинетке оралу')}
+        </Link>
       </p>
     ) : (
-      <p className="state">Жүктелуде…</p>
+      <p className="state">{t('Жүктелуде…')}</p>
     );
   }
 
@@ -136,7 +141,7 @@ export default function GameDetail() {
   return (
     <>
       <Link to="/organizer" className="back">
-        ← Барлық ойындар
+        {t('← Барлық ойындар')}
       </Link>
 
       <div className="head head--top">
@@ -150,10 +155,10 @@ export default function GameDetail() {
         </div>
         <div className="head__actions">
           <Link to={`/organizer/games/new?from=${game.id}`} className="btn btn--ghost btn--link">
-            Көшіру
+            {t('Көшіру')}
           </Link>
           <Link to={`/organizer/games/${game.id}/edit`} className="btn btn--ghost btn--link">
-            Өзгерту
+            {t('Өзгерту')}
           </Link>
         </div>
       </div>
@@ -168,13 +173,13 @@ export default function GameDetail() {
 
       <p className="pay-line">
         {game.is_free
-          ? 'Тегін ойын: төлем қажет емес.'
+          ? t('Тегін ойын: төлем қажет емес.')
           : [
               game.payment_info
-                ? `Төлем: ${game.payment_info}`
-                : 'Төлем мәліметі жоқ. «Өзгерту» арқылы Kaspi нөмірін қосыңыз.',
+                ? t('Төлем: {info}', { info: game.payment_info })
+                : t('Төлем мәліметі жоқ. «Өзгерту» арқылы Kaspi нөмірін қосыңыз.'),
               game.payment_deadline &&
-                `Мерзімі: ${deadlineText(game.play_date, game.payment_deadline)}${game.payment_overdue ? ' (өтті)' : ''}`,
+                `${t('Мерзімі: {time}', { time: deadlineText(game.play_date, game.payment_deadline) })}${game.payment_overdue ? ` (${t('өтті')})` : ''}`,
             ]
               .filter(Boolean)
               .join(' · ')}
@@ -185,7 +190,7 @@ export default function GameDetail() {
           <b>
             {game.registered_count}/{game.capacity}
           </b>
-          <span>тіркелді</span>
+          <span>{t('тіркелді')}</span>
         </div>
         {!game.is_free && (
           <>
@@ -193,11 +198,11 @@ export default function GameDetail() {
               <b>
                 {game.paid_count}/{game.registered_count}
               </b>
-              <span>төледі</span>
+              <span>{t('төледі')}</span>
             </div>
             <div className="stat">
               <b>{formatPrice(collected)}</b>
-              <span>жиналды · барлығы {formatPrice(expected)}</span>
+              <span>{t('жиналды · барлығы {sum}', { sum: formatPrice(expected) })}</span>
             </div>
           </>
         )}
@@ -206,15 +211,15 @@ export default function GameDetail() {
       {error && <p className="form-error">{error}</p>}
 
       <section className="block">
-        <h2 className="block__title">Ойынға сілтеме</h2>
+        <h2 className="block__title">{t('Ойынға сілтеме')}</h2>
         <SharePanel game={game} />
       </section>
 
       <section className="block">
-        <h2 className="block__title">Қатысушылар</h2>
+        <h2 className="block__title">{t('Қатысушылар')}</h2>
 
         {game.registrations.length === 0 ? (
-          <p className="state state--tight">Әзірге ешкім тіркелмеген.</p>
+          <p className="state state--tight">{t('Әзірге ешкім тіркелмеген.')}</p>
         ) : (
           <ul className="people">
             {game.registrations.map((r, i) => (
@@ -226,25 +231,25 @@ export default function GameDetail() {
                     href={whatsappLink(r.phone, game.is_free || r.paid ? undefined : paymentMessage(game, r))}
                     target="_blank"
                     rel="noreferrer"
-                    title={game.is_free || r.paid ? 'WhatsApp-та жазу' : 'Төлем туралы WhatsApp-та жазу'}
+                    title={game.is_free || r.paid ? t('WhatsApp-та жазу') : t('Төлем туралы WhatsApp-та жазу')}
                   >
-                    {formatPhoneInput(r.phone)} · {game.is_free || r.paid ? 'WhatsApp' : 'төлемді еске салу'}
+                    {formatPhoneInput(r.phone)} · {game.is_free || r.paid ? 'WhatsApp' : t('төлемді еске салу')}
                   </a>
                 </div>
-                <span className="person__gender">{GENDER[r.gender]}</span>
+                <span className="person__gender">{t(GENDER[r.gender])}</span>
                 {!game.is_free && (
                   <button
                     className={`paid ${r.paid ? 'paid--yes' : game.payment_overdue ? 'paid--late' : ''}`}
                     onClick={() => run(() => setPaid(game.id, r.id, !r.paid))}
                   >
-                    {r.paid ? 'Төленді' : game.payment_overdue ? 'Мерзімі өтті' : 'Төленбеді'}
+                    {r.paid ? t('Төленді') : game.payment_overdue ? t('Мерзімі өтті') : t('Төленбеді')}
                   </button>
                 )}
                 <button
                   className="icon-btn"
-                  aria-label={`${r.name} өшіру`}
+                  aria-label={t('{name} өшіру', { name: r.name })}
                   onClick={() => {
-                    if (window.confirm(`${r.name} тізімнен шығарылсын ба?`)) {
+                    if (window.confirm(t('{name} тізімнен шығарылсын ба?', { name: r.name }))) {
                       run(() => removeParticipant(game.id, r.id));
                     }
                   }}
@@ -259,34 +264,38 @@ export default function GameDetail() {
 
       {game.waitlist.length > 0 && (
         <section className="block">
-          <h2 className="block__title">Күту тізімі</h2>
+          <h2 className="block__title">{t('Күту тізімі')}</h2>
           <ul className="people">
             {game.waitlist.map((r, i) => {
               const hasSpot = !game.is_full && !genderFull(game, r.gender);
-              const msg = `Сәлем, ${r.name}! ${formatDate(game.play_date)}, ${game.start_time} волейбол ойынында орын босады. Келесіз бе?`;
+              const msg = t('Сәлем, {name}! {date}, {time} волейбол ойынында орын босады. Келесіз бе?', {
+                name: r.name,
+                date: formatDate(game.play_date),
+                time: game.start_time,
+              });
               return (
                 <li key={r.id} className="person">
                   <span className="person__n">{i + 1}</span>
                   <div className="person__info">
                     <strong>{r.name}</strong>
                     <a href={whatsappLink(r.phone, msg)} target="_blank" rel="noreferrer">
-                      {formatPhoneInput(r.phone)} · орын босады деп жазу
+                      {formatPhoneInput(r.phone)} · {t('орын босады деп жазу')}
                     </a>
                   </div>
-                  <span className="person__gender">{GENDER[r.gender]}</span>
+                  <span className="person__gender">{t(GENDER[r.gender])}</span>
                   <button
                     className="paid"
                     disabled={!hasSpot}
-                    title={hasSpot ? '' : 'Бос орын жоқ'}
+                    title={hasSpot ? '' : t('Бос орын жоқ')}
                     onClick={() => run(() => promoteParticipant(game.id, r.id))}
                   >
-                    Ойынға қосу
+                    {t('Ойынға қосу')}
                   </button>
                   <button
                     className="icon-btn"
-                    aria-label={`${r.name} өшіру`}
+                    aria-label={t('{name} өшіру', { name: r.name })}
                     onClick={() => {
-                      if (window.confirm(`${r.name} күту тізімінен шығарылсын ба?`)) {
+                      if (window.confirm(t('{name} күту тізімінен шығарылсын ба?', { name: r.name }))) {
                         run(() => removeParticipant(game.id, r.id));
                       }
                     }}
@@ -302,7 +311,7 @@ export default function GameDetail() {
 
       {game.cancelled.length > 0 && (
         <section className="block">
-          <h2 className="block__title">Бас тартқандар</h2>
+          <h2 className="block__title">{t('Бас тартқандар')}</h2>
           <ul className="people people--muted">
             {game.cancelled.map((r) => (
               <li key={r.id} className="person">
@@ -312,13 +321,13 @@ export default function GameDetail() {
                     {formatPhoneInput(r.phone)} · WhatsApp
                   </a>
                 </div>
-                <span className={r.paid ? 'refund' : 'person__gender'}>{r.paid ? 'Төлемді қайтару керек' : GENDER[r.gender]}</span>
+                <span className={r.paid ? 'refund' : 'person__gender'}>{r.paid ? t('Төлемді қайтару керек') : t(GENDER[r.gender])}</span>
                 <button
                   className="icon-btn"
-                  aria-label={`${r.name} жазбасын өшіру`}
-                  title={r.paid ? 'Ақша қайтарылған соң өшіріңіз' : 'Жазбаны өшіру'}
+                  aria-label={t('{name} жазбасын өшіру', { name: r.name })}
+                  title={r.paid ? t('Ақша қайтарылған соң өшіріңіз') : t('Жазбаны өшіру')}
                   onClick={() => {
-                    if (window.confirm(`${r.name} жазбасы өшірілсін бе?`)) {
+                    if (window.confirm(t('{name} жазбасы өшірілсін бе?', { name: r.name }))) {
                       run(() => removeParticipant(game.id, r.id));
                     }
                   }}
@@ -332,12 +341,12 @@ export default function GameDetail() {
       )}
 
       <section className="block">
-        <h2 className="block__title">Қолмен қосу</h2>
+        <h2 className="block__title">{t('Қолмен қосу')}</h2>
         <AddParticipant game={game} onAdded={load} />
       </section>
 
       <button className="link link--danger" onClick={removeGame}>
-        Ойынды өшіру
+        {t('Ойынды өшіру')}
       </button>
     </>
   );

@@ -1,11 +1,12 @@
+import { tr, useLang } from '../i18n.jsx';
 import ShareButton from './ShareButton.jsx';
 
 export function formatDuration(minutes) {
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
-  if (h && m) return `${h} сағ ${m} мин`;
-  if (h) return `${h} сағат`;
-  return `${m} мин`;
+  if (h && m) return tr('{h} сағ {m} мин', { h, m });
+  if (h) return tr('{h} сағат', { h });
+  return tr('{m} мин', { m });
 }
 
 export function formatPrice(price) {
@@ -14,6 +15,7 @@ export function formatPrice(price) {
 
 /** closedLabel: ойын тіркеуге жабық болса (мысалы өтіп кетсе), батырмадағы жазу */
 export default function GameCard({ game, onRegister, closedLabel }) {
+  const { t } = useLang();
   const percent = Math.min(100, Math.round((game.registered_count / game.capacity) * 100));
   const left = game.capacity - game.registered_count;
   const closed = Boolean(closedLabel); // тек өтіп кеткен ойын жабық; толған ойынға күту тізіміне жазылуға болады
@@ -24,10 +26,10 @@ export default function GameCard({ game, onRegister, closedLabel }) {
         <span className={`badge badge--${game.format}`}>{game.format_label}</span>
         <span className="card__price">
           {game.is_free ? (
-            'Тегін'
+            t('Тегін')
           ) : (
             <>
-              {formatPrice(game.price)} <small>адам басына</small>
+              {formatPrice(game.price)} <small>{t('адам басына')}</small>
             </>
           )}
         </span>
@@ -51,14 +53,14 @@ export default function GameCard({ game, onRegister, closedLabel }) {
             <b>
               {game.registered_count}/{game.capacity}
             </b>{' '}
-            · {game.teams_count} команда
+            · {t('{n} команда', { n: game.teams_count })}
           </span>
           <span className="spots__left">
             {game.is_full
               ? game.waitlist_count > 0
-                ? `Орын жоқ · күтуде: ${game.waitlist_count}`
-                : 'Орын жоқ'
-              : `${left} орын қалды`}
+                ? t('Орын жоқ · күтуде: {n}', { n: game.waitlist_count })
+                : t('Орын жоқ')
+              : t('{n} орын қалды', { n: left })}
           </span>
         </div>
         <div className="bar" role="progressbar" aria-valuenow={percent} aria-valuemin="0" aria-valuemax="100">
@@ -68,12 +70,12 @@ export default function GameCard({ game, onRegister, closedLabel }) {
 
       <div className="card__bottom">
         <span className="organizer">
-          Ұйымдастырушы: <b>{game.organizer_name}</b>
+          {t('Ұйымдастырушы:')} <b>{game.organizer_name}</b>
         </span>
         <div className="card__actions">
           <ShareButton game={game} />
           <button className="btn" disabled={closed} onClick={onRegister}>
-            {closedLabel ?? (game.is_full ? 'Күту тізімі' : 'Тіркелу')}
+            {closedLabel ?? (game.is_full ? t('Күту тізімі') : t('Тіркелу'))}
           </button>
         </div>
       </div>

@@ -87,18 +87,18 @@ class OrganizerGameController extends Controller
         $registered = $game->registrations()->count();
         if ($data['capacity'] < $registered) {
             return response()->json([
-                'message' => "Тіркелгендер саны ({$registered}) жаңа орын санынан көп.",
+                'message' => __('Тіркелгендер саны (:count) жаңа орын санынан көп.', ['count' => $registered]),
             ], 422);
         }
 
         // Формат өзгерсе, қазіргі қатысушылар жаңа жыныс лимитіне сыя ма — тексереміз
         $game->fill($data);
         $limits = $game->genderLimits();
-        foreach (['male' => 'ұлдар', 'female' => 'қыздар'] as $gender => $label) {
+        foreach (['male' => __('ұлдар'), 'female' => __('қыздар')] as $gender => $label) {
             $count = $game->registrations()->where('gender', $gender)->count();
             if ($limits[$gender] !== null && $count > $limits[$gender]) {
                 return response()->json([
-                    'message' => "Форматты өзгерту мүмкін емес: тіркелген {$label} саны жаңа лимиттен асады.",
+                    'message' => __('Форматты өзгерту мүмкін емес: тіркелген :who саны жаңа лимиттен асады.', ['who' => $label]),
                 ], 422);
             }
         }
@@ -130,9 +130,9 @@ class OrganizerGameController extends Controller
             'gender' => ['required', 'in:male,female'],
             'paid'   => ['sometimes', 'boolean'],
         ], [
-            'name.required'   => 'Атын жазыңыз.',
-            'phone.required'  => 'WhatsApp нөмірін жазыңыз.',
-            'gender.required' => 'Жынысын таңдаңыз.',
+            'name.required'   => __('Атын жазыңыз.'),
+            'phone.required'  => __('WhatsApp нөмірін жазыңыз.'),
+            'gender.required' => __('Жынысын таңдаңыз.'),
         ]);
 
         $paid = (bool) ($data['paid'] ?? false);
@@ -193,7 +193,7 @@ class OrganizerGameController extends Controller
 
     private function authorizeOwner(Request $request, Game $game): void
     {
-        abort_if($game->user_id !== $request->user()->id, 403, 'Бұл сіздің ойыныңыз емес.');
+        abort_if($game->user_id !== $request->user()->id, 403, __('Бұл сіздің ойыныңыз емес.'));
     }
 
     private function ensureBelongs(Game $game, Registration $registration): void
@@ -232,15 +232,15 @@ class OrganizerGameController extends Controller
             'payment_info'     => ['nullable', 'string', 'max:255'],
             'payment_deadline_hours' => ['nullable', 'integer', 'min:1', 'max:168'], // ойынға N сағат қалғанға дейін (≤ 7 күн)
         ], [
-            'required'                 => 'Барлық өрісті толтырыңыз.',
-            'play_date.after_or_equal' => 'Өткен күнді таңдауға болмайды.',
-            'integer'                  => 'Сан енгізіңіз.',
-            'in'                       => 'Формат дұрыс емес.',
-            'repeat_weeks.max'         => 'Ең көбі 12 апта қайталауға болады.',
-            'repeat_weeks.min'         => 'Қайталау саны теріс болмауы керек.',
-            'payment_info.max'         => 'Төлем мәліметі 255 таңбадан аспауы керек.',
-            'payment_deadline_hours.min' => 'Төлем мерзімі кемінде 1 сағат болуы керек.',
-            'payment_deadline_hours.max' => 'Төлем мерзімі ең көбі 168 сағат (7 күн).',
+            'required'                 => __('Барлық өрісті толтырыңыз.'),
+            'play_date.after_or_equal' => __('Өткен күнді таңдауға болмайды.'),
+            'integer'                  => __('Сан енгізіңіз.'),
+            'in'                       => __('Формат дұрыс емес.'),
+            'repeat_weeks.max'         => __('Ең көбі 12 апта қайталауға болады.'),
+            'repeat_weeks.min'         => __('Қайталау саны теріс болмауы керек.'),
+            'payment_info.max'         => __('Төлем мәліметі 255 таңбадан аспауы керек.'),
+            'payment_deadline_hours.min' => __('Төлем мерзімі кемінде 1 сағат болуы керек.'),
+            'payment_deadline_hours.max' => __('Төлем мерзімі ең көбі 168 сағат (7 күн).'),
         ]);
 
         unset($data['repeat_weeks']); // ойынның өрісі емес

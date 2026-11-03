@@ -20,7 +20,7 @@ class GameResource extends JsonResource
             'id'               => $this->id,
             'title'            => $this->title,
             'format'           => $this->format,
-            'format_label'     => Game::FORMATS[$this->format] ?? $this->format,
+            'format_label'     => Game::formatLabel($this->format),
             'play_date'        => $this->play_date->toDateString(),
             'start_time'       => substr($this->start_time, 0, 5),
             'end_time'         => $this->endTime(),
