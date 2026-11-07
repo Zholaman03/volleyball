@@ -22,6 +22,7 @@ class GameController extends Controller
 
         $games = Game::query()
             ->whereDate('play_date', $date)
+            ->with('organizer:id,whatsapp_group_url')
             ->withCount([
                 'registrations',
                 'waitlist',
@@ -110,6 +111,7 @@ class GameController extends Controller
             'registered_count' => $result['registered_count'],
             'capacity'         => $result['capacity'],
             'is_free'          => $game->isFree(),
+            'whatsapp_group_url' => $game->organizer?->whatsapp_group_url,
             // Төлем мәліметі тек ойынға тіркелгенде беріледі (күту тізімінде — орын босағанша емес)
             'payment_info'     => ($game->isFree() || $onWaitlist) ? null : $game->payment_info,
             'payment_deadline' => $onWaitlist ? null : $game->paymentDeadlineString(), // "2026-11-05 20:00" немесе null

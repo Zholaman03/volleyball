@@ -22,6 +22,9 @@ export default function OrganizerLayout() {
               {t('Админ')}
             </Link>
           )}
+          <Link to="/organizer/profile" className="link">
+            {t('Профиль')}
+          </Link>
           <span>{user.name}</span>
           <button className="link" onClick={logout}>
             {t('Шығу')}

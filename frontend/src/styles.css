@@ -322,6 +322,26 @@ body:has(.overlay) { overflow: hidden; }
 .hint { color: var(--muted); font-size: 14px; }
 .hint--block { margin: 0 0 16px; }
 
+/* WhatsApp тобына шақыру */
+.group {
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+  margin: 0 0 16px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--soft);
+  text-align: left;
+}
+.group strong { font-weight: 600; }
+.group p { margin: 0; color: var(--muted); font-size: 14px; max-width: none; }
+.group .btn { margin-top: 6px; min-height: 42px; }
+.success .group { width: 100%; }
+.success .group .btn { width: auto; margin-top: 6px; }
+
+.notice { margin: 0 0 20px; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--soft); font-size: 15px; }
+
 .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .seg__item {
   position: relative;

@@ -37,6 +37,8 @@ class GameResource extends JsonResource
             'male'             => ['registered' => $male, 'limit' => $limits['male']],
             'female'           => ['registered' => $female, 'limit' => $limits['female']],
             'organizer_name'   => $this->organizer_name,
+            // Ойын жаңалықтары (бас тартылды, уақыты ауысты) жарияланатын WhatsApp тобы
+            'whatsapp_group_url' => $this->organizer?->whatsapp_group_url,
         ];
     }
 }

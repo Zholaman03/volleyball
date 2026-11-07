@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { cancelMyRegistration, fetchMyRegistration } from '../api';
+import GroupBlock from '../components/GroupBlock.jsx';
 import LangSwitch from '../components/LangSwitch.jsx';
 import { useLang } from '../i18n.jsx';
 import { deadlineText, formatDate } from '../utils';
@@ -91,6 +92,11 @@ export default function CancelPage() {
               {t(STATUS_TEXT[reg.status])}
               {reg.status === 'waitlist' && reg.waitlist_position ? ` (№${reg.waitlist_position})` : ''}.
             </p>
+
+            <GroupBlock
+              url={game.whatsapp_group_url}
+              text={t('Ойын бас тартылса немесе уақыты ауысса, хабар осы топта жарияланады.')}
+            />
 
             {notice && <p className="hint hint--block">{notice}</p>}
             {error && <p className="form-error">{error}</p>}

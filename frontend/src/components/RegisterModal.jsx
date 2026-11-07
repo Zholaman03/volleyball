@@ -6,6 +6,7 @@ import { useLang } from '../i18n.jsx';
 import { copyText } from '../share';
 import { PHONE_PREFIX, deadlineText, formatPhoneInput } from '../utils';
 import { formatPrice } from './GameCard.jsx';
+import GroupBlock from './GroupBlock.jsx';
 
 const PHONE_ERROR = 'WhatsApp нөмірін дұрыс енгізіңіз, мысалы: +7 701 123 45 67.'; // t() арқылы көрсетіледі
 
@@ -39,6 +40,7 @@ export default function RegisterModal({ game, onClose, onDone }) {
   const onWaitlist = result?.status === 'waitlist';
   const payment = result?.payment_info ?? ''; // ұйымдастырушының төлем мәліметі (тіркелгеннен кейін келеді)
   const deadline = result?.payment_deadline ?? ''; // "2026-11-05 20:00": төлем мерзімі (мерзімсіз/тегін болса бос)
+  const groupUrl = result?.whatsapp_group_url ?? game.whatsapp_group_url ?? '';
   const cancelPath = result ? `/cancel/${result.cancel_token}` : '';
 
   // Таңдалған жынысқа орын жоқ болса, форма күту тізіміне жазуға ауысады
@@ -152,6 +154,13 @@ export default function RegisterModal({ game, onClose, onDone }) {
               </>
             )}
 
+            <GroupBlock
+              url={groupUrl}
+              primary
+              title={t('Топқа қосылыңыз')}
+              text={t('Ойын бас тартылса немесе уақыты ауысса, ұйымдастырушы осы топта хабарлайды.')}
+            />
+
             <div className="pay">
               <span>{t('Бас тарту сілтемесі')}</span>
               <Link to={cancelPath} className="link" onClick={onClose}>
@@ -239,6 +248,12 @@ export default function RegisterModal({ game, onClose, onDone }) {
                 })}
               </div>
             </fieldset>
+
+            <GroupBlock
+              url={game.whatsapp_group_url}
+              text={t('Ойын туралы жаңалықтар (бас тартылды, уақыты ауысты және т.б.) тек ұйымдастырушының WhatsApp тобында жарияланады. Тіркелгеннен кейін топқа қосылыңыз.')}
+              cta={t('Топқа қосылу')}
+            />
 
             {error && <p className="form-error">{error}</p>}
 

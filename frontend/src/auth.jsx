@@ -7,6 +7,7 @@ import {
   registerOrganizer,
   setOnUnauthorized,
   setToken,
+  updateProfileRequest,
 } from './api';
 
 const AuthContext = createContext(null);
@@ -44,6 +45,9 @@ export function AuthProvider({ children }) {
         const { token, user } = await registerOrganizer(payload);
         setToken(token);
         setUser(user);
+      },
+      async updateProfile(whatsappGroupUrl) {
+        setUser(await updateProfileRequest(whatsappGroupUrl));
       },
       async logout() {
         try {

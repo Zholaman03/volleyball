@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { orgGames } from '../../api';
+import { useAuth } from '../../auth.jsx';
 import { useLang } from '../../i18n.jsx';
 import { formatDate, todayStr } from '../../utils';
 
@@ -31,6 +32,7 @@ function GameRow({ game }) {
 
 export default function Dashboard() {
   const { t } = useLang();
+  const { user } = useAuth();
   const [games, setGames] = useState(null);
   const [error, setError] = useState('');
 
@@ -54,6 +56,15 @@ export default function Dashboard() {
           {t('+ Ойын қосу')}
         </Link>
       </div>
+
+      {!user.whatsapp_group_url && (
+        <p className="notice">
+          {t('WhatsApp топ сілтемесін қосыңыз: ойыншылар ойын жаңалықтарын сол топтан көреді.')}{' '}
+          <Link to="/organizer/profile" className="link">
+            {t('Профильге өту')}
+          </Link>
+        </p>
+      )}
 
       {error && <p className="state state--error">{error}</p>}
       {!games && !error && <p className="state">{t('Жүктелуде…')}</p>}
