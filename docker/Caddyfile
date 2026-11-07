@@ -1,0 +1,31 @@
+# DOMAIN берілсе (мысалы volley.kz), Caddy HTTPS сертификатты өзі алады және жаңартады.
+# Берілмесе, тек HTTP (:80), сынақ үшін.
+{$SITE_ADDRESS::80} {
+	encode zstd gzip
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options SAMEORIGIN
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+
+	# API: Laravel (PHP-FPM) контейнеріне
+	handle /api/* {
+		root * /var/www/html/public
+		php_fastcgi app:9000 {
+			root /var/www/html/public
+		}
+	}
+
+	# Қалғаны: React (SPA)
+	handle {
+		root * /srv/www
+		@assets path /assets/*
+		header @assets Cache-Control "public, max-age=31536000, immutable"
+		@html not path /assets/*
+		header @html Cache-Control "no-cache"
+		try_files {path} /index.html
+		file_server
+	}
+}
