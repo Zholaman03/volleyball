@@ -75,6 +75,8 @@ export const cancelMyRegistration = (token) => request(`/registrations/${token}/
 export const loginRequest = (payload) => request('/auth/login', { method: 'POST', body: payload });
 export const registerOrganizer = (payload) => request('/auth/register', { method: 'POST', body: payload });
 export const fetchMe = () => request('/auth/me');
+export const updateProfileRequest = (whatsapp_group_url) =>
+  request('/auth/profile', { method: 'PUT', body: { whatsapp_group_url } });
 export const logoutRequest = () => request('/auth/logout', { method: 'POST' });
 
 /* ---- Ұйымдастырушы ---- */

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Rules\WhatsAppGroupUrl;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -60,6 +61,23 @@ class AuthController extends Controller
         return response()->json($this->userData($request->user()));
     }
 
+    /** PUT /api/auth/profile — WhatsApp группа сілтемесі (бос жіберсе, өшіріледі) */
+    public function updateProfile(Request $request): JsonResponse
+    {
+        $request->merge([
+            'whatsapp_group_url' => trim((string) $request->input('whatsapp_group_url', '')) ?: null,
+        ]);
+
+        $data = $request->validate([
+            'whatsapp_group_url' => ['nullable', 'string', 'max:255', new WhatsAppGroupUrl],
+        ]);
+
+        $user = $request->user();
+        $user->update(['whatsapp_group_url' => $data['whatsapp_group_url']]);
+
+        return response()->json($this->userData($user));
+    }
+
     /** POST /api/auth/logout */
     public function logout(Request $request)
     {
@@ -84,6 +102,7 @@ class AuthController extends Controller
             'email'    => $user->email,
             'is_admin' => (bool) $user->is_admin,
             'approved' => $user->isApproved(),
+            'whatsapp_group_url' => $user->whatsapp_group_url,
         ];
     }
 }

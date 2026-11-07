@@ -8,6 +8,7 @@ import Dashboard from './pages/organizer/Dashboard.jsx';
 import GameForm from './pages/organizer/GameForm.jsx';
 import GameDetail from './pages/organizer/GameDetail.jsx';
 import AdminUsers from './pages/organizer/AdminUsers.jsx';
+import Profile from './pages/organizer/Profile.jsx';
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="games/new" element={<GameForm />} />
         <Route path="games/:id" element={<GameDetail />} />
         <Route path="games/:id/edit" element={<GameForm />} />
+        <Route path="profile" element={<Profile />} />
         <Route path="admin" element={<AdminUsers />} />
       </Route>
 

@@ -65,6 +65,7 @@ class RegistrationController extends Controller
                 'venue_name'     => $game->venue_name,
                 'venue_address'  => $game->venue_address,
                 'organizer_name' => $game->organizer_name,
+                'whatsapp_group_url' => $game->organizer?->whatsapp_group_url,
             ],
         ];
     }

@@ -46,6 +46,9 @@ export function longDate(d) {
 
 /* ---- WhatsApp нөмірі ---- */
 
+/** WhatsApp тобына шақыру сілтемесі (api/app/Rules/WhatsAppGroupUrl.php-мен бірдей ереже) */
+export const isValidGroupUrl = (value) => /^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9_-]{10,40}(\?\S*)?$/.test(value);
+
 export const PHONE_PREFIX = '+7 ';
 
 /**
